@@ -23,12 +23,25 @@ const UserSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
       },
+      addedAt: {
+        type: Date,
+        default: Date.now,
+      },
+    },
+  ],
+
+  requests: [
+    {
+      from: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
       status: {
         type: String,
-        enum: ["pending", "accepted", "blocked"],
+        enum: ["pending", "accepted"],
         default: "pending",
       },
-      addedAt: {
+      sentAt: {
         type: Date,
         default: Date.now,
       },
