@@ -6,6 +6,7 @@ import cors from "cors";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import eventRoutes from "./routes/eventRoutes.js";
+import expenseRoutes from "./routes/expenseRoutes.js";
 const app = express();
 app.use(express.json());
 dotenv.config();
@@ -21,4 +22,5 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/event", eventRoutes);
+app.use("/api/expense", expenseRoutes);
 app.listen(port);

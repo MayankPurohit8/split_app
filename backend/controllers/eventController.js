@@ -201,8 +201,11 @@ export const leaveEvent = async (req, res) => {
     if (!event) {
       return res.status(400).json({ message: "not a member" });
     }
-
-    if (event.admins.length === 0 && event.members.length > 0) {
+    if (event.admins.length == 0 && event.members.length == 0) {
+      await Event.deleteOne({
+        _id: eventId,
+      });
+    } else if (event.admins.length === 0 && event.members.length > 0) {
       const oldestMember = event.members.sort(
         (a, b) => a.addedAt - b.addedAt
       )[0];
