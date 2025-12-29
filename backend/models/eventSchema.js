@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
-import Expense from "./expenseSchema";
-import User from "./userSchema";
+import User from "./userSchema.js";
 const eventSchema = mongoose.Schema({
   name: String,
   description: String,
@@ -20,8 +19,14 @@ const eventSchema = mongoose.Schema({
   admins: [{ type: mongoose.Schema.Types.ObjectId, ref: User }],
   members: [
     {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+      added_at: {
+        type: Date,
+        default: Date.now,
+      },
     },
   ],
 });

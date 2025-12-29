@@ -14,7 +14,6 @@ const verifyToken = (req, res, next) => {
     };
     next();
   } catch (err) {
-    console.log(err);
     console.log("invalid or expired token");
   }
 };
