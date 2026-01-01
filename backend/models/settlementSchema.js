@@ -20,7 +20,7 @@ const settlementSchema = mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["pending", "completed", "cancelled"],
+    enum: ["pending", "completed", "declined"],
     default: "pending",
   },
 });

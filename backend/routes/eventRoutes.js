@@ -9,6 +9,8 @@ import {
   assignAdmin,
   revokeAdmin,
   leaveEvent,
+  getEventBalance,
+  simplifyBalance,
 } from "../controllers/eventController.js";
 import { verifyToken } from "../middlewares/authMiddleware.js";
 import { checkAdmin } from "../middlewares/checkAdmin.js";
@@ -25,5 +27,6 @@ router.post("/member/remove", verifyToken, checkAdmin, removeMember);
 router.post("/member/promote", verifyToken, checkAdmin, assignAdmin);
 router.post("/member/demote", verifyToken, checkAdmin, revokeAdmin);
 router.post("/leave", verifyToken, leaveEvent);
-
+router.get("/balance/get", verifyToken, getEventBalance);
+router.get("/balance/simplify", verifyToken, simplifyBalance);
 export default router;

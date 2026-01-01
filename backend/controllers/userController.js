@@ -1,4 +1,7 @@
 import User from "../models/userSchema.js";
+import Expense from "../models/expenseSchema.js";
+import Event from "../models/eventSchema.js";
+import { findBalance } from "../utils/findBalance.js";
 const updateUserProfile = async (req, res) => {};
 
 const getUserProfile = async (req, res) => {
@@ -184,6 +187,53 @@ const getFriendsList = async (req, res) => {
   }
 };
 
+const getUserbalance = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const events = await Event.find({ "members.userId": userId }).select("_id");
+    const expenses = await Expense.find({
+      eventId: { $in: events.map((e) => e._id) },
+    });
+    let balance = 0;
+    for (const expense of expenses) {
+      const userSplit = expense.splits.find(
+        (s) => s.userId.toString() === userId.toString()
+      );
+      if (expense.paidBy.toString() === userId.toString()) {
+        const userShare = userSplit ? userSplit.amount : 0;
+        balance += expense.amount - userShare;
+      } else if (userSplit) {
+        balance -= userSplit.amount;
+      }
+    }
+    return res.status(200).json({ balance: balance });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Something went wrong while retriving user balance" });
+  }
+};
+
+const getFriendBalanceAndExpenses = async (req, res) => {
+  try {
+    const { friendId } = req.query;
+    const userId = req.user.id;
+    const balance = await findBalance(friendId, userId);
+
+    const expenses = await Expense.find({
+      $or: [
+        { paidBy: userId, "splits.userId": friendId },
+        { paidBy: friendId, "splits.userId": userId },
+      ],
+    });
+    return res.status(200).json({ balance: balance, expenses: expenses });
+  } catch (err) {
+    console.log(err);
+    return res
+      .status(500)
+      .json({ message: "something went wrong while retriving friend balance" });
+  }
+};
 export {
   getUserProfile,
   sendFriendRequest,
@@ -192,4 +242,6 @@ export {
   removeFriend,
   getFriendsList,
   getRequests,
+  getUserbalance,
+  getFriendBalanceAndExpenses,
 };

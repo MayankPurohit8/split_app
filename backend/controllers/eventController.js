@@ -1,4 +1,6 @@
 import Event from "../models/eventSchema.js";
+import Expense from "../models/expenseSchema.js";
+import mongoose from "mongoose";
 export const createEvent = async (req, res) => {
   try {
     const { name, description } = req.body;
@@ -220,5 +222,105 @@ export const leaveEvent = async (req, res) => {
     return res
       .status(500)
       .json({ message: "something went wrong while making admin " });
+  }
+};
+
+export const getEventBalance = async (req, res) => {
+  try {
+    const { eventId } = req.query;
+    const result = await Expense.aggregate([
+      { $match: { eventId: new mongoose.Types.ObjectId(eventId) } },
+      {
+        $group: {
+          _id: null,
+          totalSum: { $sum: "$amount" },
+        },
+      },
+    ]);
+    const balance = result[0]?.totalSum || 0;
+    return res.status(200).json({ balance: balance });
+  } catch (err) {
+    console.log(err);
+    return res
+      .status(500)
+      .json({ message: "something went wrong while retrieving balance" });
+  }
+};
+
+export const simplifyBalance = async (req, res) => {
+  try {
+    const { eventId } = req.query;
+    const event = await Event.findById(eventId).select("members.userId");
+    const expenses = await Expense.find({ eventId: eventId }).select(
+      "amount paidBy splits"
+    );
+
+    let netExpenses = [];
+
+    for (const member of event.members) {
+      netExpenses.push({
+        userId: member.userId,
+        amount: 0,
+      });
+    }
+
+    for (const expense of expenses) {
+      const payer = netExpenses.find(
+        (b) => b.userId.toString() === expense.paidBy.toString()
+      );
+      console.log(payer);
+      if (payer) {
+        payer.amount += expense.amount;
+      }
+
+      for (const split of expense.splits) {
+        const lended = netExpenses.find(
+          (b) => b.userId.toString() == split.userId.toString()
+        );
+        if (lended) {
+          lended.amount -= split.amount;
+        }
+      }
+    }
+    let debitors = [];
+    let creditors = [];
+
+    for (const exp of netExpenses) {
+      if (exp.amount < 0) {
+        debitors.push({ userId: exp.userId, balance: -exp.amount });
+      } else if (exp.amount > 0) {
+        creditors.push({ userId: exp.userId, balance: exp.amount });
+      }
+    }
+    console.log(debitors);
+    console.log(creditors);
+    let i = 0;
+    let j = 0;
+    let simplified = [];
+    while (i < debitors.length && j < creditors.length) {
+      console.log("in loop");
+      const debitor = debitors[i];
+      const creditor = creditors[j];
+
+      const amount = Math.min(creditor.balance, debitor.balance);
+      console.log(amount);
+      simplified.push({
+        from: debitor.userId,
+        to: creditor.userId,
+        amount: amount,
+      });
+
+      debitor.balance -= amount;
+      creditor.balance -= amount;
+
+      if (debitor.balance == 0) i++;
+      if (creditor.balance == 0) j++;
+    }
+
+    return res.status(200).json({ simplified: simplified });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ message: "something went wrong while simplifying balance" });
   }
 };
