@@ -18,7 +18,7 @@ router.post("/create", verifyToken, createExpense);
 router.post("/update", verifyToken, expenseModification, updateExpense);
 router.post("/delete", verifyToken, expenseModification, deleteExpense);
 router.get("/get", verifyToken, expenseRetrival, getExpense);
-router.get("/get/event", verifyToken, expenseRetrival, getEventExpenses);
-router.get("/get/user", verifyToken, expenseRetrival, getUserExpenses);
+router.get("/get/event", verifyToken, getEventExpenses);
+router.get("/get/user", verifyToken, getUserExpenses);
 
 export default router;

@@ -12,6 +12,7 @@ import {
   getEventBalance,
   simplifyBalance,
 } from "../controllers/eventController.js";
+import { getEventNotifications } from "../controllers/notificationController.js";
 import { verifyToken } from "../middlewares/authMiddleware.js";
 import { checkAdmin } from "../middlewares/checkAdmin.js";
 import express from "express";
@@ -29,4 +30,5 @@ router.post("/member/demote", verifyToken, checkAdmin, revokeAdmin);
 router.post("/leave", verifyToken, leaveEvent);
 router.get("/balance/get", verifyToken, getEventBalance);
 router.get("/balance/simplify", verifyToken, simplifyBalance);
+router.get("/notifications", verifyToken, getEventNotifications);
 export default router;

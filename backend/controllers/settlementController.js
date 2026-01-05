@@ -1,6 +1,7 @@
 import Settlement from "../models/settlementSchema.js";
 import Event from "../models/eventSchema.js";
 import User from "../models/userSchema.js";
+import Notification from "../models/NotificationSchema.js";
 import { findBalance } from "../utils/findBalance.js";
 export const createSettlement = async (req, res) => {
   try {
@@ -36,7 +37,13 @@ export const createSettlement = async (req, res) => {
       amount: amount,
       eventId: eventId,
     });
-
+    const sender = await User.findById(req.user.id);
+    const notification = await Notification.create({
+      userId: toUser,
+      eventId: eventId,
+      type: "SETTLEMENT_REQ",
+      message: `${sender.name} sent you payment of ${amount}`,
+    });
     return res
       .status(200)
       .json({ message: "Settlement Created", settlement: settlement });
@@ -51,7 +58,7 @@ export const acceptSettlement = async (req, res) => {
   try {
     const { settlementId } = req.body;
     const userId = req.user.id;
-
+    const user = await User.findById(userId);
     const settlement = await Settlement.findById(settlementId);
     if (!settlement) {
       return res.status(400).json({ message: "settlement does not exist" });
@@ -70,6 +77,12 @@ export const acceptSettlement = async (req, res) => {
       }
     );
 
+    const notification = await Notification.create({
+      userId: settlement.toUser,
+      eventId: settlement.eventId,
+      type: "SETTLEMENT_ACCEPT",
+      message: `${user.name} accepted settlement of amount ${amount} for ${settlement.note}`,
+    });
     return res.status(200).json({
       message: "settlement completed",
       updatedSettlement: updatedSettlement,
@@ -104,7 +117,13 @@ export const declineSettlement = async (req, res) => {
         status: "declined",
       }
     );
-
+    const user = await User.findById(userId);
+    const notification = await Notification.create({
+      userId: settlement.toUser,
+      eventId: settlement.eventId,
+      type: "SETTLEMENT_DECLINE",
+      message: `${user.name} declined settlement of amount ${amount} for ${settlement.note}`,
+    });
     return res.status(200).json({
       message: "settlement declined",
       updatedSettlement: updatedSettlement,
@@ -122,9 +141,11 @@ export const getSettlementHistory = async (req, res) => {
 
     const settlements = await Settlement.find({
       $or: [{ toUser: userId }, { fromUser: userId }],
-    });
+    })
+      .populate("fromUser", "_id name email username")
+      .populate("toUser", "_id name email username");
 
-    return res.status(200).json({ settlements: settlements });
+    return res.status(200).json({ settlements: settlements, userId: userId });
   } catch (err) {
     return res
       .status(500)
@@ -149,11 +170,30 @@ export const getEventSettlementHistory = async (req, res) => {
     const settlements = await Settlement.find({
       eventId: eventId,
     });
-
     return res.status(200).json({ settlements: settlements });
   } catch (err) {
     return res.status(500).json({
       message: "something went wrong while fetching event settlements",
     });
+  }
+};
+
+export const getSettlement = async (req, res) => {
+  try {
+    const { settlementId } = req.query;
+    console.log(settlementId);
+    const userId = req.user.id;
+    const settlement = await Settlement.findOne({
+      _id: settlementId,
+      $or: [{ toUser: userId }, { fromUser: userId }],
+    })
+      .populate("toUser", "_id name username email")
+      .populate("fromUser", "_id name username email")
+      .populate("eventId", "_id name");
+    return res.status(200).json({ settlement, userId });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ message: "somthing  went wrong while fetching settlement" });
   }
 };

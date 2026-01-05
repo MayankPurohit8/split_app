@@ -23,6 +23,7 @@ const settlementSchema = mongoose.Schema({
     enum: ["pending", "completed", "declined"],
     default: "pending",
   },
+  note: String,
 });
 
 export default mongoose.model("Settlement", settlementSchema);

@@ -9,6 +9,7 @@ import {
   getUserbalance,
   getFriendBalanceAndExpenses,
 } from "../controllers/userController.js";
+import { getUserNotifications } from "../controllers/notificationController.js";
 import express from "express";
 import { verifyToken } from "../middlewares/authMiddleware.js";
 const router = express.Router();
@@ -22,4 +23,5 @@ router.get("/friends", verifyToken, getFriendsList);
 router.get("/requests", verifyToken, getRequests);
 router.get("/getBalance", verifyToken, getUserbalance);
 router.get("/friend/balance", verifyToken, getFriendBalanceAndExpenses);
+router.get("/notifications", verifyToken, getUserNotifications);
 export default router;

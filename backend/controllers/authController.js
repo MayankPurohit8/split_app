@@ -4,29 +4,22 @@ import jwt from "jsonwebtoken";
 export const register = async (req, res) => {
   try {
     const { email, name, phone, password, username } = req.body;
-    if (!email || !name || !phone || !password || !username) {
+    if (!email || !name || !password || !username) {
       return res.status(400).json({ message: "One or more empty fields" });
     }
     const existingEmail = await User.findOne({ email: email });
-    const existingPhone = await User.findOne({ phone: phone });
     const existingUsername = await User.findOne({ userName: username });
 
     if (existingEmail) {
-      return res.status(400).json({ message: "User with same email exists" });
-    }
-    if (existingPhone) {
-      return res.status(400).json({ message: "User with same phone exists" });
+      return res.status(400).json({ message: "Email already registered" });
     }
     if (existingUsername) {
-      return res
-        .status(400)
-        .json({ message: "User with same username exists" });
+      return res.status(400).json({ message: "username exists already" });
     }
     const hash = await bcrypt.hash(password, 10);
     const newUser = await User.create({
       email: email,
       name: name,
-      phone: phone,
       password: hash,
       userName: username,
     });
@@ -45,8 +38,17 @@ export const register = async (req, res) => {
       .json({ message: "something went wrong while registering the user" });
   }
 };
+4;
 export const login = async (req, res) => {
   try {
+    const existingToken = req.cookies?.token;
+    if (existingToken) {
+      const decoded = jwt.verify(existingToken, process.env.AUTH_SECRET);
+      if (decoded) {
+        return res.status(400).json({ message: "already logged in" });
+      }
+    }
+    console.log(existingToken);
     const { emailorusername, password } = req.body;
     if (!emailorusername || !password) {
       return res.status(400).json({ message: "One or more empty fields!" });
@@ -71,12 +73,13 @@ export const login = async (req, res) => {
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: false,
+      sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     return res.status(200).json({ message: "User logged in" });
   } catch (err) {
+    console.log(err);
     return res
       .status(500)
       .json({ message: "Something went wrong while logging in user" });
@@ -98,4 +101,14 @@ export const logout = (req, res) => {
       message: "Something went wrong while logging out",
     });
   }
+};
+
+export const checkUsername = async (req, res) => {
+  const { username } = req.body;
+
+  const exists = await User.exists({ userName: username });
+
+  return res.status(200).json({
+    avaliable: !exists,
+  });
 };

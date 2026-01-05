@@ -25,7 +25,7 @@ export const expenseModification = async (req, res, next) => {
 
 export const expenseRetrival = async (req, res, next) => {
   try {
-    const { expenseId } = req.body;
+    const { expenseId } = req.query;
     const userId = req.user.id;
     const expense = await Expense.findOne({ _id: expenseId });
     const eventId = expense.eventId;

@@ -1,5 +1,8 @@
 import Event from "../models/eventSchema.js";
 import Expense from "../models/expenseSchema.js";
+import Settlement from "../models/settlementSchema.js";
+import Notification from "../models/NotificationSchema.js";
+import User from "../models/userSchema.js";
 import mongoose from "mongoose";
 export const createEvent = async (req, res) => {
   try {
@@ -30,7 +33,6 @@ export const getEvent = async (req, res) => {
       _id: eventId,
       "members.userId": userId,
     });
-
     if (!event) {
       return res.status(400).json({ message: "Event not found" });
     }
@@ -107,12 +109,18 @@ export const getAllEvent = async (req, res) => {
 export const addMember = async (req, res) => {
   try {
     const { eventId, memberId } = req.body;
-
-    const event = await Event.updateOne(
+    const userId = req.user.id;
+    const user = await User.findOne({ _id: userId });
+    const event = await Event.FindOneAndupdate(
       { _id: eventId },
       { $addToSet: { members: { userId: memberId } } }
     );
-
+    const notification = await Notification.create({
+      userId: memberId,
+      eventId: eventId,
+      type: "ADDED_TO_EVENT",
+      message: `${user.name} added you to event ${event.name}`,
+    });
     return res.status(200).json({ message: "member added to group" });
   } catch (err) {
     return res
@@ -228,6 +236,7 @@ export const leaveEvent = async (req, res) => {
 export const getEventBalance = async (req, res) => {
   try {
     const { eventId } = req.query;
+    const userId = req.user.id;
     const result = await Expense.aggregate([
       { $match: { eventId: new mongoose.Types.ObjectId(eventId) } },
       {
@@ -237,8 +246,42 @@ export const getEventBalance = async (req, res) => {
         },
       },
     ]);
+
     const balance = result[0]?.totalSum || 0;
-    return res.status(200).json({ balance: balance });
+
+    let balanceRelativeToUser = 0;
+
+    const expenses = await Expense.find({
+      eventId: eventId,
+      $or: [{ paidBy: userId }, { "splits.userId": userId }],
+    });
+
+    const settlements = await Settlement.find({
+      eventId: eventId,
+      $or: [{ fromUser: userId }, { toUser: userId }],
+      status: "completed",
+    });
+
+    for (const expense of expenses) {
+      if (expense.paidBy.equals(userId)) {
+        balanceRelativeToUser += expense.amount;
+      }
+      const split = expense.splits.find((exp) => exp.userId.equals(userId));
+      console.log(split);
+      if (split) {
+        balanceRelativeToUser -= split.amount;
+      }
+    }
+    for (const settlement of settlements) {
+      if (settlement.toUser.equals(userId)) {
+        balanceRelativeToUser -= settlement.amount;
+      } else {
+        balanceRelativeToUser += settlement.amount;
+      }
+    }
+    return res
+      .status(200)
+      .json({ totalExpense: balance, userBalance: balanceRelativeToUser });
   } catch (err) {
     console.log(err);
     return res
@@ -316,7 +359,6 @@ export const simplifyBalance = async (req, res) => {
       if (debitor.balance == 0) i++;
       if (creditor.balance == 0) j++;
     }
-
     return res.status(200).json({ simplified: simplified });
   } catch (err) {
     return res

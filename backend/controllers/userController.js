@@ -1,6 +1,7 @@
 import User from "../models/userSchema.js";
 import Expense from "../models/expenseSchema.js";
 import Event from "../models/eventSchema.js";
+import Notification from "../models/NotificationSchema.js";
 import { findBalance } from "../utils/findBalance.js";
 const updateUserProfile = async (req, res) => {};
 
@@ -21,7 +22,7 @@ const sendFriendRequest = async (req, res) => {
     const fromUserId = req.user.id;
     const fromUserDoc = await User.findById(fromUserId);
     const toUserDoc = await User.findOne({
-      $or: [{ userName: toUser }, { email: toUser }, { phone: toUser }],
+      $or: [{ userName: toUser }, { email: toUser }],
     });
 
     if (!toUserDoc) {
@@ -53,6 +54,11 @@ const sendFriendRequest = async (req, res) => {
       { _id: toUserDoc._id },
       { $push: { requests: { from: fromUserId } } }
     );
+    const notification = await Notification.create({
+      userId: toUser,
+      type: "FRIEND_REQ_SEND",
+      message: `${fromUserDoc.name} sent you a friend request`,
+    });
     return res.status(200).json({ message: "Friend request Sent" });
   } catch (err) {
     return res.status(500).json({ message: "could not send request " });
@@ -90,7 +96,11 @@ const acceptFriendRequest = async (req, res) => {
       { _id: fromUserDoc._id },
       { $addToSet: { friends: { friends: toUserDoc._id } } }
     );
-
+    const notification = await Notification.create({
+      userId: fromUser,
+      type: "FRIEND_REQ_ACCEPT",
+      message: `${fromUserDoc.name} accepted friend request`,
+    });
     return res.status(200).json({ message: "Friend request accepted" });
   } catch (err) {
     return res.status(500).jon({ message: "could not accept friend request" });

@@ -4,6 +4,7 @@ export const createExpense = async (req, res) => {
   try {
     const { eventId, paidBy, amount, note, splits } = req.body;
     const userId = req.user.id;
+    const user = await findById(userId);
     const event = await Event.findOne({
       _id: eventId,
       "members.userId": userId,
@@ -17,6 +18,12 @@ export const createExpense = async (req, res) => {
       eventId: eventId,
       paidBy: paidBy,
       splits: splits,
+    });
+    const Notification = await Notification.create({
+      type: "EXPENSE_CREATED",
+      userId: userId,
+      eventId: eventId,
+      message: `${user.name} created new expense of ${amount}`,
     });
 
     return res
@@ -72,7 +79,10 @@ export const getExpense = async (req, res) => {
 
     const expense = await Expense.findOne({
       _id: expenseId,
-    }).populate("splits.userId", "-password");
+    })
+      .populate("splits.userId", "-password -friends -requests -systemAdmin")
+      .populate("eventId")
+      .populate("paidBy", "-password -friends  -requests -systemAdmin");
     if (!expense) {
       return res.status(400).json({ message: "expense not found" });
     }
@@ -87,9 +97,17 @@ export const getExpense = async (req, res) => {
 export const getEventExpenses = async (req, res) => {
   try {
     const { eventId } = req.query;
+    const userId = req.user.id;
+    const event = await Event.findOne({
+      _id: eventId,
+      "members.userId": userId,
+    });
+    if (!event) {
+      return res.status(400).json({ message: "non member , access denied" });
+    }
     const expenses = await Expense.find({
       eventId: eventId,
-    }).populate("splits.userId", "-password");
+    });
 
     return res.status(200).json({ expenses: expenses });
   } catch (err) {

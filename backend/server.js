@@ -13,7 +13,12 @@ app.use(express.json());
 dotenv.config();
 const port = 3000;
 app.use(cookieParser());
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 conn();
 
 app.get("/", (req, res) => {
