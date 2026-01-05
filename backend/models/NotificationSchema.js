@@ -16,8 +16,8 @@ const notificationSchema = mongoose.Schema({
     ],
   },
   message: String,
-  eventId: { type: mongoose.Schema.Types.ObjectId, ref: "Events" },
+  eventId: { type: mongoose.Schema.Types.ObjectId, ref: "Event" },
   createdAt: { type: Date, default: Date.now },
 });
 
-export default mongoose.mode("Notification", notificationSchema);
+export default mongoose.model("Notification", notificationSchema);
