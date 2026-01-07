@@ -4,7 +4,7 @@ import RecentActivity from "./RecentActivity";
 const DashBoard = () => {
   return (
     <>
-      <div className="h-screen w-full bg-[#272b30] relative">
+      <div className="h-full w-full bg-[#272b30] relative">
         <div className="h-1/3">
           <BalanceCard />
         </div>

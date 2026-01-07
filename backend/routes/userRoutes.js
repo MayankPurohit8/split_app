@@ -8,6 +8,8 @@ import {
   getRequests,
   getUserbalance,
   getFriendBalanceAndExpenses,
+  editProfile,
+  searchUsers,
 } from "../controllers/userController.js";
 import { getUserNotifications } from "../controllers/notificationController.js";
 import express from "express";
@@ -15,6 +17,7 @@ import { verifyToken } from "../middlewares/authMiddleware.js";
 const router = express.Router();
 
 router.get("/profile", verifyToken, getUserProfile);
+router.post("/profile/edit", verifyToken, editProfile);
 router.post("/friends/send", verifyToken, sendFriendRequest);
 router.post("/friends/accept", verifyToken, acceptFriendRequest);
 router.post("/friends/reject", verifyToken, rejectFriendRequest);
@@ -24,4 +27,5 @@ router.get("/requests", verifyToken, getRequests);
 router.get("/getBalance", verifyToken, getUserbalance);
 router.get("/friend/balance", verifyToken, getFriendBalanceAndExpenses);
 router.get("/notifications", verifyToken, getUserNotifications);
+router.post("/search", verifyToken, searchUsers);
 export default router;

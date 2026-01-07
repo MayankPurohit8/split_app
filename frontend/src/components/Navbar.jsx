@@ -9,7 +9,7 @@ import { NavLink } from "react-router";
 const Navbar = ({ activeTab, setActiveTab }) => {
   return (
     <>
-      <div className=" bg-white absolute shadow-2xl  *:flex-1  *:transition-all *:duration-300       shadow-blue-900 text-gray-500 bottom-0 w-full h-20 flex  justify-center  ">
+      <div className=" bg-white absolute shadow-2xl  *:flex-1  *:transition-all *:duration-300       shadow-blue-900 text-gray-500 bottom-0 w-full h-1/10 flex  justify-center  ">
         <NavLink
           to="/"
           className={`flex flex-col items-center  justify-center ${

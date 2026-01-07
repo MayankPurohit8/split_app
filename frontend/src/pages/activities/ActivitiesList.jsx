@@ -1,9 +1,10 @@
 import axios from "axios";
-import { ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router";
+import SettlementDetails from "../settlements/SettlementDetail";
 
-const RecentActivty = () => {
+const ActivtiesList = () => {
   const navigate = useNavigate();
   const [showSettlementDetails, setShowSettlementDetails] = useState(false);
   const [selectedSettlement, setSelectedSettlement] = useState("");
@@ -28,7 +29,7 @@ const RecentActivty = () => {
   }, []);
   return (
     <>
-      <div className="px-5 h-full overflow-scroll relative">
+      <div className="px- h-full overflow-scroll relative ">
         {showSettlementDetails && (
           <div className="fixed w-full h-screen flex items-start justify-center">
             <SettlementDetails
@@ -37,20 +38,18 @@ const RecentActivty = () => {
             />
           </div>
         )}
-        <div className=" flex justify-between text-lg px-3 py-5">
-          <div className="font-bold ">Activity</div>
+        <div className=" flex  text-lg px-3 py-5">
           <NavLink
-            to={"/activities"}
+            to={"/"}
             className="flex  items-center gap-1 justify-center font-semibold hover:bg-amber-100 px-2 py-1  rounded-xl "
           >
-            <div className="">See All</div>
-            <ArrowRight size={20} />
+            <ArrowLeft size={20} />
           </NavLink>
         </div>
-        <div className="  h-full   ">
-          {activities.slice(0, 15).map((act, index) => (
-            <div className="flex justify-between items-center p-5 hover:bg-gray-200 rounded-xl">
-              <div className="">
+        <div className=" h-full  flex flex-col gap-5">
+          {activities.map((act, index) => (
+            <div className="p-5 border-b ">
+              <div className=" ">
                 <div className="text-2xl font-bold ">{act.message}</div>
                 <div className="flex gap-2 font-semibold text-gray-500">
                   <div className="">
@@ -68,28 +67,12 @@ const RecentActivty = () => {
                   </div>
                 </div>
               </div>
-
-              <div
-                className={`text-2xl 
-                `}
-              ></div>
             </div>
           ))}
-          {activities.length > 8 && (
-            <NavLink
-              to={"/activities"}
-              className="  flex py-5 text-lg  w-full  justify-center  text-20xl"
-            >
-              <div className="flex gap-2 items-center p-2 rounded-xl hover:bg-amber-200">
-                <div className="">See All </div>
-                <ArrowRight />
-              </div>
-            </NavLink>
-          )}
         </div>
       </div>
     </>
   );
 };
 
-export default RecentActivty;
+export default ActivtiesList;

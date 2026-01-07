@@ -3,9 +3,14 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 export const register = async (req, res) => {
   try {
-    const { email, name, phone, password, username } = req.body;
-    if (!email || !name || !password || !username) {
+    const { email, name, avatar, password, username } = req.body;
+    if (!email || !name || !password || !username || !avatar) {
       return res.status(400).json({ message: "One or more empty fields" });
+    }
+    if (password.length < 8) {
+      return res
+        .status(400)
+        .json({ message: "password should be more than equal 8 characters" });
     }
     const existingEmail = await User.findOne({ email: email });
     const existingUsername = await User.findOne({ userName: username });
@@ -22,6 +27,7 @@ export const register = async (req, res) => {
       name: name,
       password: hash,
       userName: username,
+      avatar: avatar,
     });
 
     return res.status(201).json({
@@ -76,6 +82,7 @@ export const login = async (req, res) => {
       secure: false,
       sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: "/",
     });
     return res.status(200).json({ message: "User logged in" });
   } catch (err) {
@@ -85,12 +92,14 @@ export const login = async (req, res) => {
       .json({ message: "Something went wrong while logging in user" });
   }
 };
-export const logout = (req, res) => {
+export const logout = async (req, res) => {
   try {
-    res.clearCookie("token", {
+    res.cookie("token", "", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: false,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 0,
     });
 
     return res.status(200).json({
@@ -111,4 +120,18 @@ export const checkUsername = async (req, res) => {
   return res.status(200).json({
     avaliable: !exists,
   });
+};
+
+export const checkEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const exists = await User.exists({ email: email });
+
+    return res.status(200).json({
+      avaliable: !exists,
+    });
+  } catch (err) {
+    console.log(err);
+  }
 };

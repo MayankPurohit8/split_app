@@ -39,20 +39,20 @@ const EventsList = () => {
   }, []);
   return (
     <>
-      <div className="h-screen w-full bg-gray-100 px-7 py-5">
+      <div className="h-screen w-full bg-slate-100 p-5">
         <header className="flex justify-between items-center">
-          <div className="font-bold text-4xl">Groups</div>
+          <div className="font-bold text-4xl">Events</div>
           <div className="flex space-x-10 items-center ">
             <div className="">
               <Search size={30} />
             </div>
-            <div className="bg-yellow-200 p-2 rounded-xl">
+            <div onCL className="bg-yellow-200 p-2 rounded-xl">
               <Plus size={30} />
             </div>
           </div>
         </header>
         <main>
-          <div className="mt-10">All groups</div>
+          <div className="mt-10">All Events</div>
           <div className="space-y-5 py-5">
             {events &&
               events.map((event, index) => (

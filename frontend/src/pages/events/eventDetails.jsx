@@ -2,6 +2,7 @@ import axios from "axios";
 import { ArrowLeft, Ellipsis, PieChart } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
+import { avatarGenerator } from "../../../utils/avatarGenerator";
 
 const EventDetails = () => {
   const navigate = useNavigate();
@@ -11,7 +12,6 @@ const EventDetails = () => {
   const [userBalance, setUserBalance] = useState("0");
   const [expenses, setExpenses] = useState([]);
   const eventId = useParams().eventId;
-
   useEffect(() => {
     const fetchEvent = async () => {
       try {
@@ -61,8 +61,8 @@ const EventDetails = () => {
   }, []);
   return (
     <>
-      <div className=" h-screen bg-[#252323]">
-        <div className="h-1/3">
+      <div className=" h-full  bg-[#252323]">
+        <div className="h-2/6">
           <header className="flex justify-between p-10 text-amber-400">
             <div
               className=""
@@ -90,7 +90,7 @@ const EventDetails = () => {
             </div>
           </div>
         </div>
-        <div className="bg-gray-100 rounded-t-4xl h-2/3 p-10">
+        <div className="bg-gray-100 rounded-t-4xl min-h-4/6 p-10">
           <div className="flex justify-between text-center">
             <div className="">
               <div className="text-xl font-semibold">Group Spent:</div>
@@ -109,11 +109,13 @@ const EventDetails = () => {
           </div>
           <hr className="my-5" />
           <div className="text-sm mb-5">expenses made :</div>
-          <div className="">
+          <div className="flex flex-col gap-5">
             {expenses.map((exp, index) => (
               <div
                 onClick={() => {
-                  navigate(`/expense/${exp._id}`);
+                  navigate(`/expense/${exp._id}`, {
+                    state: { eventId: eventId },
+                  });
                 }}
                 className=" hover:bg-yellow-200 bg-white rounded-xl p-5 shadow-md flex justify-between"
               >

@@ -5,8 +5,8 @@ const MainLayout = () => {
   const [activeTab, setActiveTab] = useState("Activity");
   return (
     <>
-      <div className="min-h-screen flex flex-col">
-        <div className="">
+      <div className="h-screen">
+        <div className="h-9/10">
           <Outlet />
         </div>
         <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />

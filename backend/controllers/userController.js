@@ -3,7 +3,23 @@ import Expense from "../models/expenseSchema.js";
 import Event from "../models/eventSchema.js";
 import Notification from "../models/NotificationSchema.js";
 import { findBalance } from "../utils/findBalance.js";
-const updateUserProfile = async (req, res) => {};
+const editProfile = async (req, res) => {
+  try {
+    const { name, userName, avatarUrl } = req.body;
+    let userId = req.user.id;
+    let updatedUser = await User.findOneAndUpdate(
+      { _id: userId },
+      {
+        name: name,
+        avatarUrl: avatarUrl,
+        userName: userName,
+      }
+    );
+    return res.status(200).json({ message: "Updated user details" });
+  } catch (err) {
+    console.log(err);
+  }
+};
 
 const getUserProfile = async (req, res) => {
   try {
@@ -244,8 +260,52 @@ const getFriendBalanceAndExpenses = async (req, res) => {
       .json({ message: "something went wrong while retriving friend balance" });
   }
 };
+
+const searchUsers = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { search } = req.body;
+    if (search === "") {
+      return res.status(400).json({ message: "empty search" });
+    }
+    const userRequests = await User.findById(userId).select(
+      "requests ,friends"
+    );
+    console.log(userRequests.requests);
+    const users = await User.find({
+      _id: { $ne: userId },
+      $or: [
+        {
+          name: { $regex: search, $options: "i" },
+        },
+        { userName: { $regex: search, $options: "i" } },
+      ],
+    });
+    for (const u of users) {
+      u.status = "none";
+    }
+    const req = users.filter((u) =>
+      userRequests.requests.some((r) => r.from === u._id)
+    );
+
+    const friends = users.filter((u) =>
+      userRequests.friends.some((r) => r.from === u._id)
+    );
+
+    for (const r of req) {
+      r.status = "pending";
+    }
+    for (const f of friends) {
+      f.status = "friends";
+    }
+    return res.status(200).json({ users });
+  } catch (err) {
+    return res.status(500).json("Something went wrong");
+  }
+};
 export {
   getUserProfile,
+  editProfile,
   sendFriendRequest,
   acceptFriendRequest,
   rejectFriendRequest,
@@ -254,4 +314,5 @@ export {
   getRequests,
   getUserbalance,
   getFriendBalanceAndExpenses,
+  searchUsers,
 };
