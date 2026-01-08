@@ -24,7 +24,9 @@ const editProfile = async (req, res) => {
 const getUserProfile = async (req, res) => {
   try {
     const { id } = req.user;
-    const user = await User.findById(id).select("-password");
+    const user = await User.findById(id)
+      .select("-password")
+      .populate("friends.userId", "name userName avatarUrl");
 
     res.status(200).json({ user: user });
   } catch (err) {
@@ -37,9 +39,7 @@ const sendFriendRequest = async (req, res) => {
     const { toUser } = req.body;
     const fromUserId = req.user.id;
     const fromUserDoc = await User.findById(fromUserId);
-    const toUserDoc = await User.findOne({
-      $or: [{ userName: toUser }, { email: toUser }],
-    });
+    const toUserDoc = await User.findById(toUser);
 
     if (!toUserDoc) {
       return res.status(400).json({ message: "User does not exist" });
@@ -86,8 +86,8 @@ const acceptFriendRequest = async (req, res) => {
     const { fromUser } = req.body;
     const toUser = req.user.id;
 
-    const fromUserDoc = await User.findById({ _id: fromUser });
-    const toUserDoc = await User.findById({ _id: toUser });
+    const fromUserDoc = await User.findById(fromUser);
+    const toUserDoc = await User.findById(toUser);
 
     const alreadyFriend = await User.findOne({
       _id: toUserDoc._id,
@@ -100,7 +100,6 @@ const acceptFriendRequest = async (req, res) => {
     await User.updateOne(
       {
         _id: toUserDoc._id,
-        "requests.from": fromUserDoc._id,
       },
       {
         $pull: { requests: { from: fromUserDoc._id } },
@@ -119,7 +118,8 @@ const acceptFriendRequest = async (req, res) => {
     });
     return res.status(200).json({ message: "Friend request accepted" });
   } catch (err) {
-    return res.status(500).jon({ message: "could not accept friend request" });
+    console.log(err);
+    return res.status(500).json({ message: "could not accept friend request" });
   }
 };
 
@@ -128,12 +128,9 @@ const rejectFriendRequest = async (req, res) => {
     const { fromUser } = req.body;
     const toUser = req.user.id;
 
-    const fromUserDoc = User.findById(fromUser);
-    const toUserDoc = User.findById(toUser);
-
     const alreadyFriend = await User.findOne({
-      _id: toUserDoc._id,
-      "friends.userId": fromUserDoc._id,
+      _id: toUser,
+      "friends.userId": fromUser,
     });
 
     if (alreadyFriend) {
@@ -142,8 +139,8 @@ const rejectFriendRequest = async (req, res) => {
 
     await User.updateOne(
       {
-        _id: toUserDoc._id,
-        "requests.from": fromUserDoc._id,
+        _id: toUser,
+        "requests.from": fromUser,
       },
       {
         $pull: { requests: { from: fromUser } },
@@ -268,9 +265,7 @@ const searchUsers = async (req, res) => {
     if (search === "") {
       return res.status(400).json({ message: "empty search" });
     }
-    const userRequests = await User.findById(userId).select(
-      "requests ,friends"
-    );
+    const userRequests = await User.findById(userId).select("requests");
     console.log(userRequests.requests);
     const users = await User.find({
       _id: { $ne: userId },
@@ -281,23 +276,6 @@ const searchUsers = async (req, res) => {
         { userName: { $regex: search, $options: "i" } },
       ],
     });
-    for (const u of users) {
-      u.status = "none";
-    }
-    const req = users.filter((u) =>
-      userRequests.requests.some((r) => r.from === u._id)
-    );
-
-    const friends = users.filter((u) =>
-      userRequests.friends.some((r) => r.from === u._id)
-    );
-
-    for (const r of req) {
-      r.status = "pending";
-    }
-    for (const f of friends) {
-      f.status = "friends";
-    }
     return res.status(200).json({ users });
   } catch (err) {
     return res.status(500).json("Something went wrong");

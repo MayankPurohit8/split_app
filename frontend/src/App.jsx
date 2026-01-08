@@ -14,6 +14,7 @@ import Profile from "./pages/profile/Profile";
 import ActivtiesList from "./pages/activities/ActivitiesList";
 import EditProfile from "./pages/profile/EditProfile";
 import FriendsList from "./pages/friends/FriendsList";
+import UserProfile from "./pages/friends/UserProfile";
 function App() {
   return (
     <>
@@ -33,6 +34,7 @@ function App() {
           <Route path="/settlements" element={<SettlementsList />} />
           <Route path="/activities" element={<ActivtiesList />} />
           <Route path="/profile/edit" element={<EditProfile />} />
+          <Route path="/user/:userId" element={<UserProfile />} />
         </Routes>
       </BrowserRouter>
     </>

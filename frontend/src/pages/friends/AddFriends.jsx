@@ -1,8 +1,10 @@
 import axios from "axios";
 import { Search, User } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
 const AddFriends = () => {
+  const navigate = useNavigate();
   const baseUrl = import.meta.env.VITE_BACKEND_URL;
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
@@ -43,9 +45,10 @@ const AddFriends = () => {
   return (
     <>
       <div className="w-full h-full p-5">
-        <div className="relative  bg-white rounded-full">
+        <div className="relative mt-5 border border-amber-400  bg-white rounded-full">
           <input
             value={search}
+            placeholder="Search for Users"
             onChange={(e) => {
               setSearch(e.target.value);
             }}
@@ -58,7 +61,10 @@ const AddFriends = () => {
         </div>
         <div className="h-8/10 overflow-scroll flex flex-col mt-5 gap-3">
           {users.map((u, idx) => (
-            <div className="flex gap-5 bg-white px-5 py-2 items-center rounded-2xl justify-between shadow-2xs">
+            <div
+              onClick={() => navigate(`/user/${u._id}`, { state: { user: u } })}
+              className="flex gap-5 bg-white px-5 py-2 items-center rounded-2xl justify-between shadow-2xs"
+            >
               <div className="flex gap-5 items-center">
                 <div className="h-18 w-18 border rounded-full overflow-hidden">
                   <img src={u.avatarUrl} />
@@ -67,9 +73,6 @@ const AddFriends = () => {
                   <div className="">@{u.userName}</div>
                   <div className="">{u.name}</div>
                 </div>
-              </div>
-              <div className="p-2 bg-amber-100 rounded-xl active:bg-amber-200">
-                add
               </div>
             </div>
           ))}
