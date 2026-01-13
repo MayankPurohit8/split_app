@@ -2,10 +2,12 @@ import axios from "axios";
 import { Plus, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
+import CreateEvent from "./CreateEvent";
 const EventsList = () => {
   const navigate = useNavigate();
   const baseUrl = import.meta.env.VITE_BACKEND_URL;
   const [events, setEvents] = useState([]);
+  const [showAddEvent, setShowAddEvent] = useState(false);
   useEffect(() => {
     const fetchEvents = async () => {
       try {
@@ -39,14 +41,18 @@ const EventsList = () => {
   }, []);
   return (
     <>
-      <div className="h-screen w-full bg-slate-100 p-5">
+      {showAddEvent && <CreateEvent setShowAddEvent={setShowAddEvent} />}
+      <div className="h-full w-full overflow-scroll bg-slate-100 p-5 relative">
         <header className="flex justify-between items-center">
           <div className="font-bold text-4xl">Events</div>
           <div className="flex space-x-10 items-center ">
             <div className="">
               <Search size={30} />
             </div>
-            <div onCL className="bg-yellow-200 p-2 rounded-xl">
+            <div
+              onClick={() => setShowAddEvent(true)}
+              className="bg-yellow-200 p-2 rounded-xl"
+            >
               <Plus size={30} />
             </div>
           </div>

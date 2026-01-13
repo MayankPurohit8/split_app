@@ -2,12 +2,14 @@ import { ArrowRightCircle } from "lucide-react";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router";
+import { useAuth } from "../../../context/AuthContext";
 import axios from "axios";
 const Login = () => {
   const baseUrl = import.meta.env.VITE_BACKEND_URL;
   const [emailorusername, setEmailorusernme] = useState("");
   const [password, setPassword] = useState("");
   let navigate = useNavigate();
+  const { setUserId } = useAuth();
   const Login = async () => {
     try {
       const res = await axios.post(
@@ -18,10 +20,13 @@ const Login = () => {
         },
         { withCredentials: true }
       );
+      console.log(res);
       toast.success(res.data.message);
+      localStorage.setItem("userId", res.data.userId);
+      setUserId(res.data.userId);
       navigate("/");
     } catch (err) {
-      toast.error(err.response.data.message);
+      toast.error(err);
     }
   };
   return (

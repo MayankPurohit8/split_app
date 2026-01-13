@@ -1,17 +1,18 @@
 import axios from "axios";
-import { ArrowLeft, Ellipsis, PieChart } from "lucide-react";
+import { ArrowLeft, Ellipsis, PieChart, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router";
-import { avatarGenerator } from "../../../utils/avatarGenerator";
+import { NavLink, useNavigate, useParams } from "react-router";
 
 const EventDetails = () => {
   const navigate = useNavigate();
   const baseUrl = import.meta.env.VITE_BACKEND_URL;
   const [event, setEvent] = useState({});
+  const [admin, setAdmin] = useState(false);
   const [totalExpense, setTotalExpense] = useState("0");
   const [userBalance, setUserBalance] = useState("0");
   const [expenses, setExpenses] = useState([]);
   const eventId = useParams().eventId;
+  const [menu, setMenu] = useState(false);
   useEffect(() => {
     const fetchEvent = async () => {
       try {
@@ -22,6 +23,7 @@ const EventDetails = () => {
           },
         });
         setEvent(res.data.event);
+        setAdmin(res.data.isAdmin);
       } catch (err) {
         console.log(err);
       }
@@ -61,7 +63,7 @@ const EventDetails = () => {
   }, []);
   return (
     <>
-      <div className=" h-full  bg-[#252323]">
+      <div className=" h-screen   bg-[#252323] relative">
         <div className="h-2/6">
           <header className="flex justify-between p-10 text-amber-400">
             <div
@@ -76,8 +78,34 @@ const EventDetails = () => {
               <div className="">
                 <PieChart />
               </div>
-              <div className="">
-                <Ellipsis />
+              <div className=" transtion-all relative">
+                <div
+                  className={` transtion-all  transform line shadow-md duration-200 origin-top p-2 w-50 rounded bg-[#1b1b1b]  border-white absolute top-9 right-0 overflow-scroll
+ *:rounded-xl *:p-3 *:hover:bg-[#535353] *:hover:px-4 *:transition-all ease-out text-white shadow-black flex flex-col  text-lg
+ ${menu ? "scale-y-100 opacity-100" : "scale-y-0 opacity-0"}`}
+                >
+                  {admin && (
+                    <div
+                      className=""
+                      onClick={() => navigate(`/events/addmembers/${eventId}`)}
+                    >
+                      Add Members
+                    </div>
+                  )}
+                  <div
+                    onClick={() => navigate(`/events/members/${eventId}`)}
+                    className=""
+                  >
+                    All Members
+                  </div>
+                  {admin && <div className="text-red-400">Delete Event </div>}
+                </div>
+
+                {menu ? (
+                  <X onClick={() => setMenu(false)} />
+                ) : (
+                  <Ellipsis onClick={() => setMenu(true)} />
+                )}
               </div>
             </div>
           </header>

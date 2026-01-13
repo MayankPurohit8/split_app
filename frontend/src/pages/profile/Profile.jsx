@@ -39,6 +39,8 @@ const Profile = () => {
           withCredentials: true,
         }
       );
+      localStorage.removeItem("userId");
+      toast.success("Logged Out");
       navigate("/");
     } catch (err) {
       toast.error("something went wrong");

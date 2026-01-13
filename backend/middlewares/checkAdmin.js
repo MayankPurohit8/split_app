@@ -6,7 +6,7 @@ export const checkAdmin = (req, res, next) => {
 
     const event = Event.findOne({
       _id: eventId,
-      admin: userId,
+      admins: userId,
     });
     if (!event) {
       return res.status(400).json({ message: "Invalid operation" });

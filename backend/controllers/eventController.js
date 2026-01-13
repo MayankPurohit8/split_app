@@ -32,12 +32,14 @@ export const getEvent = async (req, res) => {
     const event = await Event.findOne({
       _id: eventId,
       "members.userId": userId,
-    });
+    })
+      .populate("members.userId", "-password")
+      .populate("admins", "-password");
     if (!event) {
       return res.status(400).json({ message: "Event not found" });
     }
-
-    return res.status(200).json({ event: event });
+    const isAdmin = event.admins.some((u) => u._id == userId);
+    return res.status(200).json({ event: event, isAdmin });
   } catch (err) {
     return res.status(500).json({ message: "event could not be fetched" });
   }
@@ -106,23 +108,43 @@ export const getAllEvent = async (req, res) => {
   }
 };
 
-export const addMember = async (req, res) => {
+export const addMembers = async (req, res) => {
   try {
-    const { eventId, memberId } = req.body;
+    const { eventId, users } = req.body;
+    console.log(users);
     const userId = req.user.id;
+    if (!eventId) {
+      return res.status(400).json({ message: "no event selected" });
+    }
+    const event = await Event.findById(eventId);
+    if (!event) {
+      return res.status(400).json({ message: "Event does not exist" });
+    }
+
+    const already = new Set(event.members.map((obj) => obj.userId._id));
+    const members = users.filter((obj) => already.has(obj));
+
+    if (members.length == 0) {
+      return res.status(400).json({ message: "no members to add" });
+    }
     const user = await User.findOne({ _id: userId });
-    const event = await Event.FindOneAndupdate(
+    const updatedEvent = await Event.findOneAndUpdate(
       { _id: eventId },
-      { $addToSet: { members: { userId: memberId } } }
+      { $addToSet: { members: { $each: members } } },
+      { new: true }
     );
-    const notification = await Notification.create({
-      userId: memberId,
+    const notifications = members.map((m) => ({
+      userId: m.userId,
       eventId: eventId,
       type: "ADDED_TO_EVENT",
       message: `${user.name} added you to event ${event.name}`,
-    });
-    return res.status(200).json({ message: "member added to group" });
+    }));
+    await Notification.insertMany(notifications);
+    return res
+      .status(200)
+      .json({ message: "members added to group", updatedEvent });
   } catch (err) {
+    console.log(err);
     return res
       .status(500)
       .json({ message: "something went wrong while adding member " });

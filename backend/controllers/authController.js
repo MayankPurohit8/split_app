@@ -84,7 +84,10 @@ export const login = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
       path: "/",
     });
-    return res.status(200).json({ message: "User logged in" });
+    console.log(user._id);
+    return res
+      .status(200)
+      .json({ message: "User logged in", userId: user._id });
   } catch (err) {
     console.log(err);
     return res
