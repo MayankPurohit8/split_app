@@ -9,24 +9,20 @@ const AddMembers = () => {
   const baseUrl = import.meta.env.VITE_BACKEND_URL;
   const [friends, setFriends] = useState([]);
   const [selectedPeople, setSelectedPeople] = useState([]);
-  const [user, setUser] = useState(null);
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchFriends = async () => {
       try {
-        const res = await axios.get(`${baseUrl}/api/user/profile`, {
+        let res = await axios.get(`${baseUrl}/api/user/friends`, {
           withCredentials: true,
         });
-        setUser(res.data.user);
-        setFriends(res.data.user.friends);
+        console.log(res.data.friends);
+        setFriends(res.data.friends.friends);
       } catch (err) {
         console.log(err);
       }
     };
-    fetchProfile();
+    fetchFriends();
   }, []);
-  useEffect(() => {
-    console.log(selectedPeople);
-  }, [selectedPeople]);
 
   const selected = (id) => {
     return selectedPeople?.some((u) => u.userId._id == id);
@@ -41,7 +37,6 @@ const AddMembers = () => {
         },
         { withCredentials: true }
       );
-      console.log(res.data);
       toast.success("Members added Successfully");
       navigate(`/events/${eventId}`);
     } catch (err) {
@@ -50,7 +45,7 @@ const AddMembers = () => {
   };
   return (
     <>
-      <div className="p-5 h-screen w-full bg-slate-100">
+      <div className="p-5 h-screen  bg-slate-100 ">
         <div
           onClick={() => navigate(`/events/${eventId}`)}
           className="flex items-center gap-5 "
@@ -94,7 +89,7 @@ const AddMembers = () => {
                 <div className="">{f.userId.userName}</div>
               </div>
             ))}
-            <div className="fixed flex items-center justify-center  bottom-0 left-0 bg-slate-300  h-20 w-full">
+            <div className="fixed flex items-center justify-center   bottom-0 left-0 bg-slate-300  h-20 min-w-[420px]">
               <div
                 onClick={() => handleAdd()}
                 className="px-5 py-2 rounded-xl text-2xl font-bold bg-amber-200"

@@ -10,6 +10,7 @@ import {
   getFriendBalanceAndExpenses,
   editProfile,
   searchUsers,
+  getFriends,
 } from "../controllers/userController.js";
 import { getUserNotifications } from "../controllers/notificationController.js";
 import express from "express";
@@ -18,6 +19,7 @@ const router = express.Router();
 
 router.get("/profile", verifyToken, getUserProfile);
 router.post("/profile/edit", verifyToken, editProfile);
+router.get("/friends", verifyToken, getFriends);
 router.post("/friends/send", verifyToken, sendFriendRequest);
 router.post("/friends/accept", verifyToken, acceptFriendRequest);
 router.post("/friends/reject", verifyToken, rejectFriendRequest);

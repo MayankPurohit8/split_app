@@ -53,7 +53,7 @@ const Profile = () => {
         <div className="flex  justify-between text-4xl  font-bold items-start">
           <div className="">Profile</div>
         </div>
-        <div className="px-7 flex items-center flex-col mt-7 h-3/10">
+        <div className="px-7 flex items-center flex-col mt-7 h-4/10">
           <div className="h-32 w-32 overflow-hidden rounded-full shadow-lg">
             <img src={user.avatarUrl} alt="" className="bg-white" />
           </div>
@@ -112,7 +112,7 @@ const Profile = () => {
                 <ChevronRight />
               </div>
             </div>
-            <div className="">
+            <div className="text-center">
               <div className="p-2 bg-slate-200 rounded-full">
                 <ReceiptText />
               </div>

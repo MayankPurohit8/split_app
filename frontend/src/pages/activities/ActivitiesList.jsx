@@ -29,7 +29,7 @@ const ActivtiesList = () => {
   }, []);
   return (
     <>
-      <div className="px- h-full overflow-scroll relative ">
+      <div className="  h-full overflow-scroll relative ">
         {showSettlementDetails && (
           <div className="fixed w-full h-screen flex items-start justify-center">
             <SettlementDetails

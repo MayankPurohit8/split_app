@@ -73,15 +73,15 @@ const EventsList = () => {
                       {event.description}
                     </div>
                     <div className="text-sm mt-3 flex items-center">
-                      {event.members.length} Friends
+                      {event.members.length - 1} people
                     </div>
                   </div>
                   <div
                     className={`text-3xl ${
-                      event.userBalance > 0 ? "text-green-500" : "text-red-500"
+                      event.userBalance > 0 ? "text-green-500" : "text-black"
                     }`}
                   >
-                    {event.userBalance}
+                    {event.userBalance.toFixed(2)}
                   </div>
                 </div>
               ))}

@@ -16,6 +16,9 @@ import FriendsList from "./pages/friends/FriendsList";
 import UserProfile from "./pages/friends/UserProfile";
 import AddMembers from "./pages/events/AddMembers";
 import AllMembers from "./pages/events/AllMembers";
+import CreateExpense from "./pages/expenses/CreateExpense";
+import PlainLayout from "./layouts/PlainLayout";
+
 function App() {
   return (
     <>
@@ -28,17 +31,27 @@ function App() {
 
             <Route path="/profile" element={<Profile />} />
             <Route path="/expense/:expenseId" element={<ExpenseDetails />} />
+
             <Route path="/friends" element={<FriendsList />} />
           </Route>
           <Route element={<Register />} path="/register" />
           <Route element={<Login />} path="/login" />
-          <Route path="/events/:eventId" element={<EventDetails />} />
-          <Route path="/events/addmembers/:eventId" element={<AddMembers />} />
-          <Route path="/events/members/:eventId" element={<AllMembers />} />
-          <Route path="/settlements" element={<SettlementsList />} />
-          <Route path="/activities" element={<ActivtiesList />} />
-          <Route path="/profile/edit" element={<EditProfile />} />
-          <Route path="/user/:userId" element={<UserProfile />} />
+          <Route element={<PlainLayout />}>
+            <Route path="/events/:eventId" element={<EventDetails />} />
+            <Route
+              path="/events/addmembers/:eventId"
+              element={<AddMembers />}
+            />
+            <Route path="/events/members/:eventId" element={<AllMembers />} />
+            <Route path="/settlements" element={<SettlementsList />} />
+            <Route path="/activities" element={<ActivtiesList />} />
+            <Route path="/profile/edit" element={<EditProfile />} />
+            <Route path="/user/:userId" element={<UserProfile />} />
+            <Route
+              path="/expense/create/:eventId"
+              element={<CreateExpense />}
+            />
+          </Route>
         </Routes>
       </BrowserRouter>
     </>

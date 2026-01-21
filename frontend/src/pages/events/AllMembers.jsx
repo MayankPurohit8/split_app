@@ -9,8 +9,10 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
+import { toast } from "react-toastify";
 
 const AllMembers = () => {
+  const [trigger, setTrigger] = useState(false);
   const baseUrl = import.meta.env.VITE_BACKEND_URL;
   const eventId = useParams().eventId;
   const navigate = useNavigate();
@@ -22,17 +24,36 @@ const AllMembers = () => {
   const { userId } = useAuth();
   const makeAdmin = async () => {
     try {
+      setTrigger(true);
       let res = await axios.post(
-        `${baseUrl}/event/member/promote`,
+        `${baseUrl}/api/event/member/promote`,
         {
           memberId: selectedId,
           eventId: eventId,
         },
         { withCredentials: true }
       );
-      console.log(res.data.message);
+      toast.success(res.data.message);
+      setTrigger(false);
     } catch (err) {
-      console.log(user);
+      console.log(err);
+    }
+  };
+  const removeAdmin = async () => {
+    try {
+      setTrigger(true);
+      let res = await axios.post(
+        `${baseUrl}/api/event/member/demote`,
+        {
+          memberId: selectedId,
+          eventId: eventId,
+        },
+        { withCredentials: true }
+      );
+      toast.success(res.data.message);
+      setTrigger(false);
+    } catch (err) {
+      console.log(err);
     }
   };
   useEffect(() => {
@@ -42,7 +63,7 @@ const AllMembers = () => {
           params: { eventId },
           withCredentials: true,
         });
-        setMembers(res.data.event.members);
+        setMembers(res.data.filteredMembers);
         setAdmins(res.data.event.admins);
         setAdmin(res.data.isAdmin);
       } catch (err) {
@@ -50,11 +71,25 @@ const AllMembers = () => {
       }
     };
     fetchEvent();
-  }, []);
+  }, [trigger]);
 
-  useEffect(() => {
-    if (members && admins) diffAdminMember();
-  }, []);
+  const remove = async () => {
+    try {
+      setTrigger(true);
+      let res = await axios.post(
+        `${baseUrl}/api/event/member/remove`,
+        {
+          eventId: eventId,
+          memberId: selectedId,
+        },
+        { withCredentials: true }
+      );
+      toast.warn(res.data.message);
+      setTrigger(false);
+    } catch (err) {
+      console.log(err);
+    }
+  };
   return (
     <>
       <div className="h-screen w-full  bg-slate-100 p-5">
@@ -105,8 +140,10 @@ const AllMembers = () => {
               </div>
               {menu && a._id == selectedId && (
                 <div className="z-1 absolute top-8 right-15  transition-all text-xl rounded-lg  bg-slate-200 *:p-2 *:hover:bg-slate-100 *:font-semibold ">
-                  <div>Remove Admin</div>
-                  <div className="text-red-500">Remove</div>
+                  <div onClick={() => removeAdmin()}>Remove Admin</div>
+                  <div onClick={() => remove()} className="text-red-500">
+                    Remove
+                  </div>
                 </div>
               )}
             </div>
@@ -140,8 +177,10 @@ const AllMembers = () => {
               </div>
               {menu && f.userId._id == selectedId && (
                 <div className="z-1 absolute top-8 right-15  transition-all text-xl rounded-lg  bg-slate-200 *:p-2 *:hover:bg-slate-100 *:font-semibold ">
-                  <div>Make Admin</div>
-                  <div className="text-red-500">Remove</div>
+                  <div onClick={() => makeAdmin()}>Make Admin</div>
+                  <div onClick={() => remove()} className="text-red-500">
+                    Remove
+                  </div>
                 </div>
               )}
             </div>

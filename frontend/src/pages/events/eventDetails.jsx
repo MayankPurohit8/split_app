@@ -1,8 +1,16 @@
 import axios from "axios";
-import { ArrowLeft, Ellipsis, PieChart, X } from "lucide-react";
+import {
+  ArrowLeft,
+  Ellipsis,
+  PieChart,
+  ThermometerSunIcon,
+  X,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { NavLink, useNavigate, useParams } from "react-router";
-
+import CreateExpense from "../expenses/CreateExpense";
+import { toast } from "react-toastify";
+import Loading from "../Loading";
 const EventDetails = () => {
   const navigate = useNavigate();
   const baseUrl = import.meta.env.VITE_BACKEND_URL;
@@ -13,6 +21,8 @@ const EventDetails = () => {
   const [expenses, setExpenses] = useState([]);
   const eventId = useParams().eventId;
   const [menu, setMenu] = useState(false);
+  const [showCreateExpense, setShowCreateExpense] = useState(false);
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     const fetchEvent = async () => {
       try {
@@ -60,10 +70,31 @@ const EventDetails = () => {
     fetchEvent();
     fetchBalance();
     fetchExpenses();
-  }, []);
+  }, [showCreateExpense]);
+
+  const deleteEvent = async () => {
+    try {
+      let res = await axios.post(
+        `${baseUrl}/api/event/delete`,
+        {
+          eventId: eventId,
+        },
+        {
+          withCredentials: true,
+        }
+      );
+      console.log(res.data.message);
+      navigate("/events");
+    } catch (err) {
+      toast.error(err.response.data.message);
+    }
+  };
+  if (loading) {
+    return <Loading />;
+  }
   return (
     <>
-      <div className=" h-screen   bg-[#252323] relative">
+      <div className=" h-screen overflow-scroll bg-[#252323] relative">
         <div className="h-2/6">
           <header className="flex justify-between p-10 text-amber-400">
             <div
@@ -98,7 +129,11 @@ const EventDetails = () => {
                   >
                     All Members
                   </div>
-                  {admin && <div className="text-red-400">Delete Event </div>}
+                  {admin && (
+                    <div onClick={() => deleteEvent()} className="text-red-400">
+                      Delete Event{" "}
+                    </div>
+                  )}
                 </div>
 
                 {menu ? (
@@ -131,7 +166,7 @@ const EventDetails = () => {
                   userBalance > 0 ? "text-green-500" : "text-red-500"
                 }`}
               >
-                {userBalance}
+                {Number(userBalance).toFixed(2)}
               </div>
             </div>
           </div>
@@ -157,6 +192,24 @@ const EventDetails = () => {
             ))}
           </div>
         </div>
+        <div className="fixed bottom-0 min-w-[420px]  h-30 flex items-center justify-center  pointer-events-none ">
+          {!showCreateExpense && (
+            <div
+              onClick={() => setShowCreateExpense(true)}
+              className="text-xl bg-amber-200 p-3 shadow-2xl active:shadow-none pointer-events-auto active:bg-amber-300 rounded-xl"
+            >
+              Add Expense
+            </div>
+          )}
+        </div>
+        {showCreateExpense && (
+          <div className=" flex items-end max-w-[420px] h-full fixed backdrop-blur-md  bg-transparent bottom-0 w-full transition-all">
+            <CreateExpense
+              eventId={eventId}
+              setShowCreateExpense={setShowCreateExpense}
+            />
+          </div>
+        )}
       </div>
     </>
   );

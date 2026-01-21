@@ -1,10 +1,12 @@
 import Expense from "../models/expenseSchema.js";
 import Event from "../models/eventSchema.js";
+import User from "../models/userSchema.js";
+import Notification from "../models/NotificationSchema.js";
 export const createExpense = async (req, res) => {
   try {
     const { eventId, paidBy, amount, note, splits } = req.body;
     const userId = req.user.id;
-    const user = await findById(userId);
+    const user = await User.findById(userId);
     const event = await Event.findOne({
       _id: eventId,
       "members.userId": userId,
@@ -19,8 +21,8 @@ export const createExpense = async (req, res) => {
       paidBy: paidBy,
       splits: splits,
     });
-    const Notification = await Notification.create({
-      type: "EXPENSE_CREATED",
+    const notification = await Notification.create({
+      type: "EXPENSE_ADDED",
       userId: userId,
       eventId: eventId,
       message: `${user.name} created new expense of ${amount}`,

@@ -39,7 +39,12 @@ export const getEvent = async (req, res) => {
       return res.status(400).json({ message: "Event not found" });
     }
     const isAdmin = event.admins.some((u) => u._id == userId);
-    return res.status(200).json({ event: event, isAdmin });
+    const adminSet = new Set(event.admins.map((admin) => admin._id.toString()));
+    const filteredMembers = event.members.filter(
+      (member) => !adminSet.has(member.userId._id.toString())
+    );
+
+    return res.status(200).json({ event: event, isAdmin, filteredMembers });
   } catch (err) {
     return res.status(500).json({ message: "event could not be fetched" });
   }
@@ -84,10 +89,23 @@ export const deleteEvent = async (req, res) => {
     if (!event) {
       return res.status(400).json({ message: "event does not exist" });
     }
-
+    const expenses = await Expense.find({ eventId: eventId });
+    const settlements = await Settlement.find({ eventId: eventId });
+    let balance = 0;
+    for (const ex of expenses) {
+      balance += ex.amount;
+    }
+    for (const se of settlements) {
+      balance -= se.amount;
+    }
+    if (balance > 0) {
+      return res
+        .status(400)
+        .json({ message: "Pending balance , cannot delete" });
+    }
     await Event.deleteOne({ _id: eventId });
 
-    return res.status(200).json({ message: "event deleted successfully " });
+    return res.status(200).json({ message: "event deleted" });
   } catch (err) {
     return res
       .status(500)
@@ -111,7 +129,7 @@ export const getAllEvent = async (req, res) => {
 export const addMembers = async (req, res) => {
   try {
     const { eventId, users } = req.body;
-    console.log(users);
+
     const userId = req.user.id;
     if (!eventId) {
       return res.status(400).json({ message: "no event selected" });
@@ -121,8 +139,10 @@ export const addMembers = async (req, res) => {
       return res.status(400).json({ message: "Event does not exist" });
     }
 
-    const already = new Set(event.members.map((obj) => obj.userId._id));
-    const members = users.filter((obj) => already.has(obj));
+    const already = new Set(event.members.map((obj) => obj.userId.toString()));
+    const members = users.filter(
+      (obj) => !already.has(obj.userId._id.toString())
+    );
 
     if (members.length == 0) {
       return res.status(400).json({ message: "no members to add" });
@@ -154,6 +174,39 @@ export const addMembers = async (req, res) => {
 export const removeMember = async (req, res) => {
   try {
     const { eventId, memberId } = req.body;
+    const settlements = await Settlement.find({
+      $or: [{ toUser: memberId, fromUser: memberId }],
+      eventId: eventId,
+      status: "completed",
+    });
+    const expenses = await Expense.find({
+      eventId: eventId,
+      $or: [{ paidBy: memberId }, { "splits.userId": memberId }],
+    });
+    let balance = 0;
+
+    for (const expense of expenses) {
+      if (expense.paidBy == memberId) {
+        balance += expense.amount;
+      } else {
+        const user = expense.splits.find((u) => u.userId == memberId);
+        balance -= user.amount;
+      }
+    }
+
+    for (const s of settlements) {
+      if (s.fromUser == memberId) {
+        balance += s.amount;
+      } else {
+        balance -= s.amount;
+      }
+    }
+    if (balance != 0) {
+      return res.status(200).json({
+        message: "Cannot remove user , pending expenses",
+        balance: balance,
+      });
+    }
 
     const event = await Event.updateOne(
       { _id: eventId },
@@ -164,9 +217,9 @@ export const removeMember = async (req, res) => {
         },
       }
     );
-
     return res.status(200).json({ message: "member removed from group" });
   } catch (err) {
+    console.log(err);
     return res
       .status(500)
       .json({ message: "something went wrong while removing member " });

@@ -109,7 +109,7 @@ const acceptFriendRequest = async (req, res) => {
 
     await User.updateOne(
       { _id: fromUserDoc._id },
-      { $addToSet: { friends: { friends: toUserDoc._id } } }
+      { $addToSet: { friends: { userId: toUserDoc._id } } }
     );
     const notification = await Notification.create({
       userId: fromUser,
@@ -281,6 +281,18 @@ const searchUsers = async (req, res) => {
     return res.status(500).json("Something went wrong");
   }
 };
+const getFriends = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const friends = await User.findById(userId).populate(
+      "friends.userId",
+      "-password"
+    );
+    return res.status(200).json({ friends });
+  } catch (err) {
+    console.log(err);
+  }
+};
 export {
   getUserProfile,
   editProfile,
@@ -293,4 +305,5 @@ export {
   getUserbalance,
   getFriendBalanceAndExpenses,
   searchUsers,
+  getFriends,
 };
