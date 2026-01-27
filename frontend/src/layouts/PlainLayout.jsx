@@ -10,7 +10,7 @@ const PlainLayout = () => {
         }}
       >
         {/* PHONE CONTAINER */}
-        <div className="relative  w-full max-w-[420px] overflow-auto  bg-gray-100 min-h-dvh shadow-xl">
+        <div className="relative  w-full max-w-[420px] overflow-auto  bg-gray-100 min-h-dvh  shadow-xl">
           {/* Scrollable content */}
           <main className="h-full overflow-y-auto pb-[calc(4rem+env(safe-area-inset-bottom))]">
             <Outlet />

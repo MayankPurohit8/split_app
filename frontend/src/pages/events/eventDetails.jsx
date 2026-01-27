@@ -1,7 +1,9 @@
 import axios from "axios";
 import {
   ArrowLeft,
+  CircleFadingPlus,
   Ellipsis,
+  IndianRupee,
   PieChart,
   ThermometerSunIcon,
   X,
@@ -106,9 +108,6 @@ const EventDetails = () => {
               <ArrowLeft />
             </div>
             <div className="flex gap-x-10">
-              <div className="">
-                <PieChart />
-              </div>
               <div className=" transtion-all relative">
                 <div
                   className={` transtion-all  transform line shadow-md duration-200 origin-top p-2 w-50 rounded bg-[#1b1b1b]  border-white absolute top-9 right-0 overflow-scroll
@@ -170,6 +169,7 @@ const EventDetails = () => {
               </div>
             </div>
           </div>
+
           <hr className="my-5" />
           <div className="text-sm mb-5">expenses made :</div>
           <div className="flex flex-col gap-5">
@@ -192,16 +192,25 @@ const EventDetails = () => {
             ))}
           </div>
         </div>
-        <div className="fixed bottom-0 min-w-[420px]  h-30 flex items-center justify-center  pointer-events-none ">
-          {!showCreateExpense && (
+        {!showCreateExpense && (
+          <div className="fixed bottom-0 min-w-[420px]   h-20 flex items-center justify-center gap-5   pointer-events-none ">
             <div
               onClick={() => setShowCreateExpense(true)}
-              className="text-xl bg-amber-200 p-3 shadow-2xl active:shadow-none pointer-events-auto active:bg-amber-300 rounded-xl"
+              className="text-xl bg-amber-200 p-3 shadow-2xl active:shadow-none pointer-events-auto active:scale-125 transition-all rounded-full"
             >
-              Add Expense
+              <CircleFadingPlus />
             </div>
-          )}
-        </div>
+
+            <div
+              onClick={() => navigate(`/events/settle/${eventId}`)}
+              className=" -xl bg-amber-200 p-3 shadow-2xl active:shadow-none pointer-events-auto active:scale-125 transition-all  flex gap-3 items-center rounded-full  "
+            >
+              <div className="p-1 border-2 rounded-full">
+                <IndianRupee size={15} />
+              </div>
+            </div>
+          </div>
+        )}
         {showCreateExpense && (
           <div className=" flex items-end max-w-[420px] h-full fixed backdrop-blur-md  bg-transparent bottom-0 w-full transition-all">
             <CreateExpense

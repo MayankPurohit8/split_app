@@ -142,10 +142,10 @@ export const getSettlementHistory = async (req, res) => {
     const settlements = await Settlement.find({
       $or: [{ toUser: userId }, { fromUser: userId }],
     })
-      .populate("fromUser", "_id name email username")
-      .populate("toUser", "_id name email username");
+      .populate("fromUser", "_id name email username avatarUrl")
+      .populate("toUser", "_id name email username avatarUrl");
 
-    return res.status(200).json({ settlements: settlements, userId: userId });
+    return res.status(200).json({ settlements: settlements });
   } catch (err) {
     return res
       .status(500)
@@ -187,8 +187,8 @@ export const getSettlement = async (req, res) => {
       _id: settlementId,
       $or: [{ toUser: userId }, { fromUser: userId }],
     })
-      .populate("toUser", "_id name username email")
-      .populate("fromUser", "_id name username email")
+      .populate("toUser", "_id name username email avatarUrl")
+      .populate("fromUser", "_id name username email avatarUrl")
       .populate("eventId", "_id name");
     return res.status(200).json({ settlement, userId });
   } catch (err) {

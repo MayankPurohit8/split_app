@@ -2,12 +2,12 @@ import axios from "axios";
 import { Clock, IndianRupeeIcon, UsersRound, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
-
+import { useAuth } from "../../../context/AuthContext";
+import { toast } from "react-toastify";
 const SettlementDetails = ({ settlementId, setShowSettlementDetails }) => {
   const baseUrl = import.meta.env.VITE_BACKEND_URL;
-
   const navigate = useNavigate();
-  const [userId, setUserId] = useState("");
+  const { userId } = useAuth();
   const [settlement, setSettlement] = useState(null);
   useEffect(() => {
     const fetchExpense = async () => {
@@ -20,13 +20,42 @@ const SettlementDetails = ({ settlementId, setShowSettlementDetails }) => {
         });
         console.log(res.data);
         setSettlement(res.data.settlement);
-        setUserId(res.data.userId);
       } catch (err) {
         console.log(err);
       }
     };
     fetchExpense();
   }, []);
+  const acceptSettlement = async (s) => {
+    try {
+      let res = axios.post(
+        `${baseUrl}/api/settle/accept`,
+        {
+          settlementId: s._id,
+        },
+        { withCredentials: true }
+      );
+      toast.success("Settlement Accepted");
+      setShowSettlementDetails(false);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  const rejectSettlement = async (s) => {
+    try {
+      let res = axios.post(
+        `${baseUrl}/api/settle/decline`,
+        {
+          settlementId: s._id,
+        },
+        { withCredentials: true }
+      );
+      toast.success("Settlement Declined");
+      setShowSettlementDetails(false);
+    } catch (err) {
+      console.log(err);
+    }
+  };
   return (
     <>
       {settlement && (
@@ -38,6 +67,16 @@ const SettlementDetails = ({ settlementId, setShowSettlementDetails }) => {
             <X />
           </div>
           <div className="flex flex-col items-center">
+            <div className="border h-20 w-20 rounded-full overflow-hidden">
+              <img
+                src={
+                  settlement.toUser._id != userId
+                    ? settlement.toUser.avatarUrl
+                    : settlement.fromUser.avatarUrl
+                }
+                alt=""
+              />
+            </div>
             <div className="font-bold text-3xl">
               {userId != settlement.fromUser._id
                 ? settlement.fromUser.name
@@ -58,12 +97,14 @@ const SettlementDetails = ({ settlementId, setShowSettlementDetails }) => {
               </div>
               <div className="">{settlement.eventId.name}</div>
             </div>
-            <div className="">
+            {settlement.note && (
               <div className="">
-                <IndianRupeeIcon />
+                <div className="">
+                  <IndianRupeeIcon />
+                </div>
+                <div className="">{settlement.note}</div>
               </div>
-              <div className="">{settlement.note}</div>
-            </div>
+            )}
             <div className="">
               <div className="">
                 <Clock />
@@ -95,10 +136,33 @@ const SettlementDetails = ({ settlementId, setShowSettlementDetails }) => {
           </div>
           <div
             onClick={() => navigate(`/events/${settlement.eventId._id}`)}
-            className="mt-7 p-5 text-center bg-amber-300 rounded-xl font-bold hover:shadow-sm border shadow-black text-lg"
+            className="mt-5 p-2 text-center bg-amber-300 rounded-xl  shadow  "
           >
             View Event
           </div>
+          {settlement.status == "pending" &&
+            settlement.toUser._id != userId && (
+              <div className="bg-gray-200 rounded-xl p-2 mt-2 text-center shadow">
+                Pending
+              </div>
+            )}
+          {settlement.status == "pending" &&
+            settlement.toUser._id == userId && (
+              <div className=" flex  justify-around rounded-xl p-2 mt-2 text-center *:shadow *:shadow-black *:active:shadow-none *:transition-all">
+                <div
+                  onClick={() => acceptSettlement(settlement)}
+                  className="bg-green-200 p-2 rounded-xl "
+                >
+                  Accept
+                </div>
+                <div
+                  onClick={() => rejectSettlement(settlement)}
+                  className="bg-red-200 p-2 rounded-xl"
+                >
+                  Decline
+                </div>
+              </div>
+            )}
         </div>
       )}
     </>

@@ -18,6 +18,7 @@ const notificationSchema = mongoose.Schema({
   message: String,
   eventId: { type: mongoose.Schema.Types.ObjectId, ref: "Event" },
   createdAt: { type: Date, default: Date.now },
+  seen: { type: Boolean, default: false },
 });
 
 export default mongoose.model("Notification", notificationSchema);

@@ -18,6 +18,7 @@ import AddMembers from "./pages/events/AddMembers";
 import AllMembers from "./pages/events/AllMembers";
 import CreateExpense from "./pages/expenses/CreateExpense";
 import PlainLayout from "./layouts/PlainLayout";
+import CreateSettlements from "./pages/events/CreateSettlements";
 
 function App() {
   return (
@@ -50,6 +51,10 @@ function App() {
             <Route
               path="/expense/create/:eventId"
               element={<CreateExpense />}
+            />
+            <Route
+              path="/events/settle/:eventId"
+              element={<CreateSettlements />}
             />
           </Route>
         </Routes>

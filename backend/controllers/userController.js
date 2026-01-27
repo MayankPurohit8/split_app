@@ -28,7 +28,26 @@ const getUserProfile = async (req, res) => {
       .select("-password")
       .populate("friends.userId", "name userName avatarUrl");
 
-    res.status(200).json({ user: user });
+    return res.status(200).json({ user: user });
+  } catch (err) {
+    return res.status(500).json({ message: "could not fetch user profile" });
+  }
+};
+const getPeopleProfile = async (req, res) => {
+  try {
+    const { personId } = req.query;
+    const userId = req.user.id;
+    const person = await User.findById(personId);
+    if (!person) {
+      return res.status(400).json({ message: "User Not found" });
+    }
+    const { balance, expenses, settlements } = await findBalance(
+      person._id,
+      userId
+    );
+    return res
+      .status(200)
+      .json({ user: person, balance, expenses, settlements });
   } catch (err) {
     return res.status(500).json({ message: "could not fetch user profile" });
   }
@@ -200,11 +219,23 @@ const getRequests = async (req, res) => {
 const getFriendsList = async (req, res) => {
   try {
     const userId = req.user.id;
-    const user = await User.findById(userId).populate(
-      "friends.userId",
-      "_id name userName email phone"
+    let user = await User.findById(userId)
+      .populate("friends.userId", "_id name userName email avatarUrl")
+      .lean();
+    const friendsWithBalance = await Promise.all(
+      user.friends.map(async (f) => {
+        const { balance } = await findBalance(f.userId._id, userId);
+
+        return {
+          ...f,
+          userId: {
+            ...f.userId,
+            balance,
+          },
+        };
+      })
     );
-    return res.status(200).json({ friends: user.friends });
+    return res.status(200).json({ friends: friendsWithBalance });
   } catch (err) {
     return res.status(500).json({ message: "could not fetch friends" });
   }
@@ -281,18 +312,26 @@ const searchUsers = async (req, res) => {
     return res.status(500).json("Something went wrong");
   }
 };
-const getFriends = async (req, res) => {
+
+const sendRemainder = async (req, res) => {
   try {
     const userId = req.user.id;
-    const friends = await User.findById(userId).populate(
-      "friends.userId",
-      "-password"
-    );
-    return res.status(200).json({ friends });
+    const { eventId, toUser } = req.body;
+    const user = await User.findById(userId);
+    const event = await Event.findById(eventId);
+    const notified = await Notification.create({
+      userId: toUser,
+      message: `${user.name} sent you remainder for payment of ${event.name}`,
+      type: "SEND_REMAINDER",
+      eventId: eventId,
+    });
+    return res.status(200).json({ message: "Alert sent" });
   } catch (err) {
     console.log(err);
+    return res.status(500).json({ message: "something went wrong" });
   }
 };
+
 export {
   getUserProfile,
   editProfile,
@@ -305,5 +344,6 @@ export {
   getUserbalance,
   getFriendBalanceAndExpenses,
   searchUsers,
-  getFriends,
+  getPeopleProfile,
+  sendRemainder,
 };

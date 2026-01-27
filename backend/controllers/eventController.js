@@ -4,6 +4,7 @@ import Settlement from "../models/settlementSchema.js";
 import Notification from "../models/NotificationSchema.js";
 import User from "../models/userSchema.js";
 import mongoose from "mongoose";
+import { findEventUserBalance } from "../utils/findBalance.js";
 export const createEvent = async (req, res) => {
   try {
     const { name, description } = req.body;
@@ -40,12 +41,29 @@ export const getEvent = async (req, res) => {
     }
     const isAdmin = event.admins.some((u) => u._id == userId);
     const adminSet = new Set(event.admins.map((admin) => admin._id.toString()));
-    const filteredMembers = event.members.filter(
+    let filteredMembers = event.members.filter(
       (member) => !adminSet.has(member.userId._id.toString())
     );
+    let memberBalances = await Promise.all(
+      event.members.map(async (m) => {
+        const { balance, pendingSettlements } = await findEventUserBalance(
+          m.userId._id,
+          userId,
+          eventId
+        );
+        return {
+          ...m.toObject(),
+          balance,
+          pendingSettlements,
+        };
+      })
+    );
 
-    return res.status(200).json({ event: event, isAdmin, filteredMembers });
+    return res
+      .status(200)
+      .json({ event: event, isAdmin, filteredMembers, memberBalances });
   } catch (err) {
+    console.log(err);
     return res.status(500).json({ message: "event could not be fetched" });
   }
 };

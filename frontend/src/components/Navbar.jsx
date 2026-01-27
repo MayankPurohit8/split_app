@@ -4,6 +4,7 @@ import {
   ScanLine,
   Handshake,
   UserRound,
+  PieChart,
 } from "lucide-react";
 import { NavLink } from "react-router";
 const Navbar = ({ activeTab, setActiveTab }) => {
@@ -31,14 +32,14 @@ const Navbar = ({ activeTab, setActiveTab }) => {
           <div className="text-sm">Events</div>
         </NavLink>
         <NavLink
-          to="/create"
-          className={`flex flex-col items-center  justify-center ${
+          className={` rounded-full flex flex-col items-center  justify-center ${
             activeTab === "Create" ? "bg-black text-white" : ""
           }`}
-          onClick={() => setActiveTab("Create")}
         >
-          <ScanLine size={40} />
-          <div className="text-sm">Create</div>
+          <div className="bg-amber-200 p-1 rounded-full">
+            <PieChart size={40} />
+          </div>
+          <div className="text-sm">Stats</div>
         </NavLink>
         <NavLink
           to="/friends"

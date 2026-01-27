@@ -22,7 +22,7 @@ export const findBalance = async (friendId, userId) => {
       balance += friendSplit.amount;
     } else {
       const userSplit = expense.splits.find((e) => e.userId == userId);
-      balance -= userSplit.amount;
+      balance -= userSplit ? userSplit.amount : 0;
     }
   }
   for (const settlement of settlements) {
@@ -32,5 +32,47 @@ export const findBalance = async (friendId, userId) => {
       balance += settlement.amount;
     }
   }
-  return balance;
+
+  return { balance, expenses, settlements };
+};
+
+export const findEventUserBalance = async (friendId, userId, eventId) => {
+  let pendingSettlements = false;
+  const expenses = await Expense.find({
+    eventId: eventId,
+    $or: [
+      { paidBy: userId, "splits.userId": friendId },
+      { paidBy: friendId, "splits.userId": userId },
+    ],
+  });
+  const settlements = await Settlement.find({
+    eventId: eventId,
+    status: { $in: ["completed", "pending"] },
+    $or: [
+      { fromUser: userId, toUser: friendId },
+      { fromUser: friendId, toUser: userId },
+    ],
+  });
+  console.log(settlements);
+  let balance = 0;
+  for (const expense of expenses) {
+    if (expense.paidBy == userId) {
+      const friendSplit = expense.splits.find((e) => e.userId.equals(friendId));
+      balance += friendSplit.amount;
+    } else {
+      const userSplit = expense.splits.find((e) => e.userId == userId);
+      balance -= userSplit ? userSplit.amount : 0;
+    }
+  }
+  for (const settlement of settlements) {
+    if (settlement.status == "pending") {
+      pendingSettlements = true;
+    }
+    if (settlement.fromUser === userId) {
+      balance += settlement.amount;
+    } else {
+      balance -= settlement.amount;
+    }
+  }
+  return { balance, pendingSettlements };
 };

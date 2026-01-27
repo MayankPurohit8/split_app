@@ -1,9 +1,15 @@
 import axios from "axios";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Car,
+  Ellipsis,
+  EllipsisVertical,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router";
 import SettlementDetails from "../settlements/SettlementDetail";
-
+import { formatDistanceToNow } from "date-fns";
 const ActivtiesList = () => {
   const navigate = useNavigate();
   const [showSettlementDetails, setShowSettlementDetails] = useState(false);
@@ -11,6 +17,17 @@ const ActivtiesList = () => {
   const [activities, setActivities] = useState([]);
   const [settlements, setSettlements] = useState([]);
   const [userId, setUserId] = useState("");
+  const types = {
+    FRIEND_REQ_SEND: "Friend Request",
+    FRIEND_REQ_ACCEPT: "Friend Request Accepted",
+    ADDED_TO_EVENT: "Added To New Event",
+    EXPENSE_ADDED: "Expense Added",
+    SEND_REMAINDER: "Payment Remainder",
+    SETTLEMENT_REQ: "Requested Settlement",
+    SETTLEMENT_ACCEPT: "Accepted Settlement",
+    SETTLEMENT_DECLINED: "Declined Settlement",
+  };
+
   const baseUrl = import.meta.env.VITE_BACKEND_URL;
   useEffect(() => {
     const fetchSettlements = async () => {
@@ -27,9 +44,25 @@ const ActivtiesList = () => {
     };
     fetchSettlements();
   }, []);
+  const handleClick = (n) => {
+    if (["FRIEND_REQ_SEND", "FRIEND_REQ_ACCEPT"].includes(n.type)) {
+    }
+    if (
+      ["ADDED_TO_EVENT", "EXPENSE_ADDED", "SEND_REMAINDER"].includes(n.type)
+    ) {
+      navigate(`/events/${n.eventId}`);
+    }
+    if (
+      ["SETTLEMENT_REQ", "SETTLEMENT_ACCEPT", "SETTLEMENT_DECLINED"].includes(
+        n.type
+      )
+    ) {
+      navigate(`/settlements`);
+    }
+  };
   return (
     <>
-      <div className="  h-full overflow-scroll relative ">
+      <div className="  bg-gray-100 h-full overflow-scroll relative ">
         {showSettlementDetails && (
           <div className="fixed w-full h-screen flex items-start justify-center">
             <SettlementDetails
@@ -45,28 +78,33 @@ const ActivtiesList = () => {
           >
             <ArrowLeft size={20} />
           </NavLink>
+          <div className="text-3xl font-semibold">Notifications</div>
         </div>
-        <div className=" h-full  flex flex-col gap-5">
+        <div className=" h-full  flex flex-col p-2 gap-3 ">
           {activities.map((act, index) => (
-            <div className="p-5 border-b ">
+            <div
+              onClick={() => handleClick(act)}
+              className="flex relative  items-start gap-3 py-3 px-2 rounded-xl bg-white shadow-lg"
+            >
+              <div className=" border bg-amber-200 border-amber-400  rounded-full p-3">
+                <Car size={40} />
+              </div>
               <div className=" ">
-                <div className="text-2xl font-bold ">{act.message}</div>
+                <div className="text-lg font-bold ">{types[act.type]}</div>
+                <div className=" ">{act.message}</div>
                 <div className="flex gap-2 font-semibold text-gray-500">
                   <div className="">
-                    {new Date(act.createdAt).toLocaleTimeString("en-IN", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </div>
-                  <div className="">
-                    ,{" "}
-                    {new Date(act.createdAt).toLocaleDateString("en-IN", {
-                      day: "2-digit",
-                      month: "short",
+                    {formatDistanceToNow(new Date(act.createdAt), {
+                      addSuffix: true,
                     })}
                   </div>
                 </div>
               </div>
+              {!act.seen && (
+                <div className="absolute right-0 top-0 p-2">
+                  <div className="h-2 w-2 rounded-full bg-emerald-700"></div>
+                </div>
+              )}
             </div>
           ))}
         </div>
