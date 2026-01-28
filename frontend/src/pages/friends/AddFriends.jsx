@@ -35,7 +35,7 @@ const AddFriends = () => {
           }
         );
         setUsers(res.data.users);
-        console.log(res.data.users);
+        console.log(res.data);
       } catch (err) {
         console.log(err);
       }
@@ -62,7 +62,7 @@ const AddFriends = () => {
         <div className="h-8/10 overflow-scroll flex flex-col mt-5 gap-3">
           {users.map((u, idx) => (
             <div
-              onClick={() => navigate(`/user/${u.userId}`)}
+              onClick={() => navigate(`/user/${u._id}`)}
               className="flex gap-5 bg-white px-5 py-2 items-center rounded-2xl justify-between shadow-2xs"
             >
               <div className="flex gap-5 items-center">

@@ -14,12 +14,11 @@ import {
   UserPlus2,
   Users,
 } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
 import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router";
 import SettlementDetails from "../settlements/SettlementDetail";
-import { formatDistanceToNow } from "date-fns";
-import AllActivities from "./AllActivities";
-const ActivtiesList = () => {
+const AllActivities = ({ type }) => {
   const navigate = useNavigate();
   const [showSettlementDetails, setShowSettlementDetails] = useState(false);
   const [selectedSettlement, setSelectedSettlement] = useState("");
@@ -57,7 +56,6 @@ const ActivtiesList = () => {
         return <BanknoteX />;
     }
   };
-
   const baseUrl = import.meta.env.VITE_BACKEND_URL;
   useEffect(() => {
     const fetchSettlements = async () => {
@@ -77,13 +75,12 @@ const ActivtiesList = () => {
     eventSeen(n);
 
     if (["FRIEND_REQ_SEND", "FRIEND_REQ_ACCEPT"].includes(n.type)) {
-    }
-    if (
+      navigate("/requests");
+    } else if (
       ["ADDED_TO_EVENT", "EXPENSE_ADDED", "SEND_REMAINDER"].includes(n.type)
     ) {
       navigate(`/events/${n.eventId}`);
-    }
-    if (
+    } else if (
       ["SETTLEMENT_REQ", "SETTLEMENT_ACCEPT", "SETTLEMENT_DECLINED"].includes(
         n.type
       )
@@ -108,30 +105,36 @@ const ActivtiesList = () => {
     }
   };
   return (
-    <>
-      <div className="  bg-gray-100 overflow-scroll relative ">
-        {showSettlementDetails && (
-          <div className="fixed w-full h-screen flex items-start justify-center">
-            <SettlementDetails
-              settlementId={selectedSettlement}
-              setShowSettlementDetails={setShowSettlementDetails}
-            />
+    <div className="flex h-full flex-col p-2 gap-3">
+      {" "}
+      {activities.map((act, index) => (
+        <div
+          onClick={() => handleClick(act)}
+          className="flex relative border  border-gray-400 items-start gap-3 py-3 px-2 rounded-xl bg-wite shadow-lg"
+        >
+          <div className=" border shadow bg-yellow-300 border-amber-400  rounded-full p-2">
+            {renderIcon(act)}
           </div>
-        )}
-        <div className=" flex  text-lg px-3 py-5">
-          <NavLink
-            to={"/"}
-            className="flex  items-center gap-1 justify-center font-semibold hover:bg-amber-100 px-2 py-1  rounded-xl "
-          >
-            <ArrowLeft size={20} />
-          </NavLink>
-          <div className="text-3xl font-semibold">Notifications</div>
+          <div className=" ">
+            <div className="text-lg font-bold ">{types[act.type]}</div>
+            <div className=" ">{act.message}</div>
+            <div className="flex gap-2 font-semibold text-gray-500">
+              <div className="">
+                {formatDistanceToNow(new Date(act.createdAt), {
+                  addSuffix: true,
+                })}
+              </div>
+            </div>
+          </div>
+          {!act.seen && (
+            <div className="absolute right-0 top-0 p-2">
+              <div className="h-2 w-2 rounded-full bg-emerald-700"></div>
+            </div>
+          )}
         </div>
-
-        <AllActivities />
-      </div>
-    </>
+      ))}{" "}
+    </div>
   );
 };
 
-export default ActivtiesList;
+export default AllActivities;

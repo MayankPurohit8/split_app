@@ -2,6 +2,7 @@ import axios from "axios";
 import { ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router";
+import AllActivities from "../activities/AllActivities";
 
 const RecentActivty = () => {
   const navigate = useNavigate();
@@ -47,34 +48,10 @@ const RecentActivty = () => {
             <ArrowRight size={20} />
           </NavLink>
         </div>
-        <div className="  h-full   ">
-          {activities.slice(0, 15).map((act, index) => (
-            <div className="flex justify-between items-center p-5 hover:bg-gray-200 rounded-xl">
-              <div className="">
-                <div className="text-2xl font-bold ">{act.message}</div>
-                <div className="flex gap-2 font-semibold text-gray-500">
-                  <div className="">
-                    {new Date(act.createdAt).toLocaleTimeString("en-IN", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </div>
-                  <div className="">
-                    ,{" "}
-                    {new Date(act.createdAt).toLocaleDateString("en-IN", {
-                      day: "2-digit",
-                      month: "short",
-                    })}
-                  </div>
-                </div>
-              </div>
-
-              <div
-                className={`text-2xl 
-                `}
-              ></div>
-            </div>
-          ))}
+        <div className="     ">
+          <div className="h-195 overflow-hidden">
+            <AllActivities />
+          </div>
           {activities.length > 8 && (
             <NavLink
               to={"/activities"}

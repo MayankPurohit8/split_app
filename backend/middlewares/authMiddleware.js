@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 const verifyToken = (req, res, next) => {
   try {
     const token = req.cookies?.token;
+
     if (!token) {
       res.status(401).json({ message: "Authentication required" });
     }

@@ -23,6 +23,7 @@ const UserProfile = () => {
           withCredentials: true,
         });
         setUser(res.data.user);
+        console.log(res.data.user);
       } catch (err) {
         console.log(err);
       }
@@ -51,7 +52,7 @@ const UserProfile = () => {
   useEffect(() => {
     const fetchrequestStatus = () => {
       if (!user || !toUser) return;
-      const incoming = user.requests.find((u) => u.from == toUser._id);
+      const incoming = user.requests.find((u) => u.from._id == toUser._id);
       if (incoming) {
         setReqStatus("incoming");
         return;

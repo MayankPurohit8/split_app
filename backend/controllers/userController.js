@@ -26,7 +26,8 @@ const getUserProfile = async (req, res) => {
     const { id } = req.user;
     const user = await User.findById(id)
       .select("-password")
-      .populate("friends.userId", "name userName avatarUrl");
+      .populate("friends.userId", "name userName avatarUrl")
+      .populate("requests.from", "name userName avatarUrl");
 
     return res.status(200).json({ user: user });
   } catch (err) {

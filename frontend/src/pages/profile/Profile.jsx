@@ -94,7 +94,12 @@ const Profile = () => {
                 <ChevronRight />
               </div>
             </div>
-            <div className="">
+            <div
+              onClick={() => {
+                navigate("/requests");
+              }}
+              className=""
+            >
               <div className="p-2 bg-slate-200 rounded-full">
                 <BookUser />
               </div>

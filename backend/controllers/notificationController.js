@@ -35,3 +35,20 @@ export const getEventNotifications = async (req, res) => {
     });
   }
 };
+
+export const notificationSeen = async (req, res) => {
+  try {
+    const { id } = req.body;
+
+    let updated = await Notification.findOneAndUpdate(
+      { _id: id },
+      {
+        seen: true,
+      }
+    );
+    return res.status(200);
+  } catch (err) {
+    console.log(err);
+    return res.status(500);
+  }
+};

@@ -19,46 +19,47 @@ import AllMembers from "./pages/events/AllMembers";
 import CreateExpense from "./pages/expenses/CreateExpense";
 import PlainLayout from "./layouts/PlainLayout";
 import CreateSettlements from "./pages/events/CreateSettlements";
-
+import Requests from "./pages/friends/Requests";
+import { useEffect } from "react";
 function App() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (performance.getEntriesByType("navigation")[0]?.type === "reload") {
+      navigate("/", { replace: true });
+    }
+  }, []);
   return (
     <>
-      <BrowserRouter>
-        <ToastContainer />
-        <Routes>
-          <Route element={<MainLayout />}>
-            <Route path="/" element={<DashBoard />} />
-            <Route path="/events" element={<EventsList />} />
+      <ToastContainer />
+      <Routes>
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<DashBoard />} />
+          <Route path="/events" element={<EventsList />} />
 
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/expense/:expenseId" element={<ExpenseDetails />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/expense/:expenseId" element={<ExpenseDetails />} />
 
-            <Route path="/friends" element={<FriendsList />} />
-          </Route>
-          <Route element={<Register />} path="/register" />
-          <Route element={<Login />} path="/login" />
-          <Route element={<PlainLayout />}>
-            <Route path="/events/:eventId" element={<EventDetails />} />
-            <Route
-              path="/events/addmembers/:eventId"
-              element={<AddMembers />}
-            />
-            <Route path="/events/members/:eventId" element={<AllMembers />} />
-            <Route path="/settlements" element={<SettlementsList />} />
-            <Route path="/activities" element={<ActivtiesList />} />
-            <Route path="/profile/edit" element={<EditProfile />} />
-            <Route path="/user/:userId" element={<UserProfile />} />
-            <Route
-              path="/expense/create/:eventId"
-              element={<CreateExpense />}
-            />
-            <Route
-              path="/events/settle/:eventId"
-              element={<CreateSettlements />}
-            />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+          <Route path="/friends" element={<FriendsList />} />
+        </Route>
+        <Route element={<Register />} path="/register" />
+        <Route element={<Login />} path="/login" />
+        <Route element={<PlainLayout />}>
+          <Route path="/events/:eventId" element={<EventDetails />} />
+          <Route path="/events/addmembers/:eventId" element={<AddMembers />} />
+          <Route path="/events/members/:eventId" element={<AllMembers />} />
+          <Route path="/settlements" element={<SettlementsList />} />
+          <Route path="/activities" element={<ActivtiesList />} />
+          <Route path="/profile/edit" element={<EditProfile />} />
+          <Route path="/user/:userId" element={<UserProfile />} />
+          <Route path="/expense/create/:eventId" element={<CreateExpense />} />
+          <Route
+            path="/events/settle/:eventId"
+            element={<CreateSettlements />}
+          />
+          <Route path="/requests" element={<Requests />} />
+        </Route>
+      </Routes>
     </>
   );
 }

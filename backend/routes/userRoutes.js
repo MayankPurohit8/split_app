@@ -13,7 +13,10 @@ import {
   getPeopleProfile,
   sendRemainder,
 } from "../controllers/userController.js";
-import { getUserNotifications } from "../controllers/notificationController.js";
+import {
+  getUserNotifications,
+  notificationSeen,
+} from "../controllers/notificationController.js";
 import express from "express";
 import { verifyToken } from "../middlewares/authMiddleware.js";
 const router = express.Router();
@@ -33,5 +36,6 @@ router.get("/notifications", verifyToken, getUserNotifications);
 router.post("/search", verifyToken, searchUsers);
 router.get("/people/profile", verifyToken, getPeopleProfile);
 router.post("/alert", verifyToken, sendRemainder);
+router.post("/notification/seen", verifyToken, notificationSeen);
 
 export default router;
