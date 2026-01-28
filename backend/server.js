@@ -9,7 +9,7 @@ import eventRoutes from "./routes/eventRoutes.js";
 import expenseRoutes from "./routes/expenseRoutes.js";
 import settlementRoutes from "./routes/settlmentRoutes.js";
 dotenv.config();
-conn();
+await conn();
 const app = express();
 app.use(express.json());
 
