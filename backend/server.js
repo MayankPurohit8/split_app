@@ -8,9 +8,11 @@ import userRoutes from "./routes/userRoutes.js";
 import eventRoutes from "./routes/eventRoutes.js";
 import expenseRoutes from "./routes/expenseRoutes.js";
 import settlementRoutes from "./routes/settlmentRoutes.js";
+dotenv.config();
+conn();
 const app = express();
 app.use(express.json());
-dotenv.config();
+
 const port = 3000;
 app.use(cookieParser());
 app.use(
@@ -19,7 +21,6 @@ app.use(
     credentials: true,
   })
 );
-conn();
 
 app.get("/", (req, res) => {
   res.send("hello index");
