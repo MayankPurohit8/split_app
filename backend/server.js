@@ -30,3 +30,8 @@ app.use("/api/user", userRoutes);
 app.use("/api/event", eventRoutes);
 app.use("/api/expense", expenseRoutes);
 app.use("/api/settle", settlementRoutes);
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
