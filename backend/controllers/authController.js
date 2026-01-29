@@ -54,7 +54,6 @@ export const login = async (req, res) => {
         return res.status(400).json({ message: "already logged in" });
       }
     }
-    console.log(existingToken);
     const { emailorusername, password } = req.body;
     if (!emailorusername || !password) {
       return res.status(400).json({ message: "One or more empty fields!" });
@@ -76,7 +75,7 @@ export const login = async (req, res) => {
       process.env.AUTH_SECRET,
       { expiresIn: "7d" }
     );
-
+    console.log(token);
     res.cookie("token", token, {
       httpOnly: true,
       secure: false,
