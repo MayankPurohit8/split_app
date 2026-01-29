@@ -16,7 +16,7 @@ const port = 3000;
 app.use(cookieParser());
 app.use(
   cors({
-    origin: ["http://localhost:5173/", "http://192.168.1.5:5173"],
+    origin: [`${process.env.FRONTEND_URL}`],
     credentials: true,
   })
 );
@@ -30,4 +30,3 @@ app.use("/api/user", userRoutes);
 app.use("/api/event", eventRoutes);
 app.use("/api/expense", expenseRoutes);
 app.use("/api/settle", settlementRoutes);
-app.listen(port, "0.0.0.0");
